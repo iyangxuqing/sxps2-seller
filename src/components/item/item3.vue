@@ -11,12 +11,9 @@
 					<div class="item-specs" v-for="(specs, index) in item.specs" :key="specs.name" v-if="currentIndex==index">
 						<imageUploader v-model="specs.image"></imageUploader>
 						<div class="item-specs-text">
-							<input class="specs-name" :value="specs.name" placeholder="输入规格名称" @blur="specsNameInput" @keyup.enter="inputEnter">
-							<input class="specs-desc" :value="specs.desc" placeholder="输入商品附注" @blur="specsDescInput" @keyup.enter="inputEnter">
-							<div class="specs-price">
-								<input :value="specs.price" placeHolder="0.00" @blur="specsPriceInput" @keyup.enter="inputEnter">	
-								<div class="yuan">元</div>
-							</div>
+							<div class="specs-name">{{specs.name}}</div>
+							<div class="specs-desc">{{specs.desc || '商品附注'}}</div>
+							<div class="specs-price"><span class="yuan">￥</span>{{specs.price || '0.00'}}</div>
 						</div>
 					</div>
 				</div>
@@ -91,29 +88,11 @@
 			}
 		},
 		methods: {
-			inputEnter(e) {
-				e.target.blur()
-			},
-			specsNameInput(e) {
-				let value = e.target.value
-				let index = this.currentIndex
-				this.item.specs[index].name = value
-			},
-			specsDescInput(e) {
-				let value = e.target.value
-				let index = this.currentIndex
-				this.item.specs[index].desc = value
-			},
-			specsPriceInput(e) {
-				let value = e.target.value
-				let index = this.currentIndex
-				this.item.specs[index].price = value
-			},
 			tap(e) {
-				setTimeout(() => {
-					let index = e.target.dataset.index
-					this.currentIndex = index
-				}, 20)
+				console.log('tap', e)
+				let index = e.target.dataset.index
+				console.log(index)
+				this.currentIndex = index
 			},
 			press(e) {
 				console.log('press', e)
@@ -169,34 +148,29 @@
 				.image-uploader
 					width: 100vw
 					height: 280px
+					img
+						width: 100%
+						height: 100%
 				.item-specs-text
 					position: relative
-					padding: 10px 10px 0
-					input
-						width: 100%
-						outline: none
+					padding: 10px
 					border-bottom: 1px solid #ddd
 					.specs-name
+						height: 26px
 						font-size: 16px
 					.specs-desc
+						height: 12px
 						font-size: 12px
 						color: #888
-						padding: 10px 0
 					.specs-price
 						position: absolute
 						top: 50%
 						right: 10px
 						transform: translateY(-50%)
-						display: flex
-						align-items: center
-						width: 100px
-						font-size: 16px
-						input
-							color: #f63
-							font-size: 20px
-							font-weight: 200
-							text-align: right
-							margin-right: 5px
+						font-size: 20px
+						color: #f63
+						.yuan
+							font-size: 16px
 		.item-specs-selector
 			display: flex
 			flex-wrap: wrap

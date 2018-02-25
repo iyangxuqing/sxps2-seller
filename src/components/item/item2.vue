@@ -7,22 +7,17 @@
 				<div class="page-head-right"></div>
 			</div>
 			<div class="item" v-if="item">
-				<div class="item-specs-info">
-					<div class="item-specs" v-for="(specs, index) in item.specs" :key="specs.name" v-if="currentIndex==index">
-						<imageUploader v-model="specs.image"></imageUploader>
-						<div class="item-specs-text">
-							<input class="specs-name" :value="specs.name" placeholder="输入规格名称" @blur="specsNameInput" @keyup.enter="inputEnter">
-							<input class="specs-desc" :value="specs.desc" placeholder="输入商品附注" @blur="specsDescInput" @keyup.enter="inputEnter">
-							<div class="specs-price">
-								<input :value="specs.price" placeHolder="0.00" @blur="specsPriceInput" @keyup.enter="inputEnter">	
-								<div class="yuan">元</div>
-							</div>
-						</div>
+				<div class="item-info">
+					<imageUploader v-model="item.images[0]"></imageUploader>
+					<div class="specs">
+						<div class="specs-name">{{item.specs[0].name}}</div>
+						<div class="specs-desc">{{item.specs[0].desc}}</div>
+						<div class="specs-price"><span class="yuan">￥</span>{{item.specs[0].price}}</div>
 					</div>
-				</div>
-				<div class="item-specs-selector">
-					<v-touch class="specs-label" :class="{'active': currentIndex==index}" v-for="(specs, index) in item.specs" :key="specs.name" @tap="tap" @press="press" :data-index="index">{{specs.name}}</v-touch>
-					<v-touch class="specs-label specs-label-new" v-on:tap="tap">+</v-touch>
+					<div class="item-specs-container">
+						<v-touch class="specs" :class="{'active': spec.active}" v-for="spec in item.specs" :key="spec.name" @press="press" @tap="tap">{{spec.name}}</v-touch>
+						<v-touch class="specs specs-new" v-on:tap="tap">+</v-touch>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -73,7 +68,7 @@
 		},
 		data() {
 			return {
-				currentIndex: 0
+				xyz: '123'
 			}
 		},
 		created() {
@@ -91,29 +86,16 @@
 			}
 		},
 		methods: {
-			inputEnter(e) {
-				e.target.blur()
+			onTest(){
+				console.log(this.item.images[0])
 			},
-			specsNameInput(e) {
-				let value = e.target.value
-				let index = this.currentIndex
-				this.item.specs[index].name = value
-			},
-			specsDescInput(e) {
-				let value = e.target.value
-				let index = this.currentIndex
-				this.item.specs[index].desc = value
-			},
-			specsPriceInput(e) {
-				let value = e.target.value
-				let index = this.currentIndex
-				this.item.specs[index].price = value
+			imageChange(e) {
+				console.log(e)
+				console.log(e.target)
+				console.log(e.target.files)
 			},
 			tap(e) {
-				setTimeout(() => {
-					let index = e.target.dataset.index
-					this.currentIndex = index
-				}, 20)
+				console.log('tap', e)
 			},
 			press(e) {
 				console.log('press', e)
@@ -164,47 +146,44 @@
 	.slide-enter, .slide-leave-to
 		transform: translate3d(100%, 0, 0)
 	.item
-		.item-specs-info
-			.item-specs
-				.image-uploader
-					width: 100vw
-					height: 280px
-				.item-specs-text
-					position: relative
-					padding: 10px 10px 0
-					input
-						width: 100%
-						outline: none
-					border-bottom: 1px solid #ddd
-					.specs-name
+		.item-title
+			height: 44px
+			line-height: 44px
+			text-align: center
+		.item-info
+			.item-image
+				width: 100vw
+				height: 90vw
+				img
+					width: 100%
+					height: 100%
+			.specs
+				position: relative
+				padding: 10px
+				border-bottom: 1px solid #ddd
+				.specs-name
+					font-size: 16px
+					margin-bottom: 10px
+				.specs-desc
+					font-size: 12px
+					color: #888
+				.specs-price
+					position: absolute
+					top: 50%
+					right: 10px
+					transform: translateY(-50%)
+					font-size: 20px
+					color: #f63
+					.yuan
 						font-size: 16px
-					.specs-desc
-						font-size: 12px
-						color: #888
-						padding: 10px 0
-					.specs-price
-						position: absolute
-						top: 50%
-						right: 10px
-						transform: translateY(-50%)
-						display: flex
-						align-items: center
-						width: 100px
-						font-size: 16px
-						input
-							color: #f63
-							font-size: 20px
-							font-weight: 200
-							text-align: right
-							margin-right: 5px
-		.item-specs-selector
+		.item-specs-container
 			display: flex
 			flex-wrap: wrap
 			font-size: 12px
 			color: #345
 			padding: 10px 10px 0
 			border-bottom: 1px solid #ccc
-			.specs-label
+			.specs
 				padding: 8px
 				margin-right: 8px
 				margin-bottom: 8px

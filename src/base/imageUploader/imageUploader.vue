@@ -115,7 +115,7 @@
 		width: 100%
 		heiht: 100%
 		min-width: 100%
-		min-height: 300px
+		min-height: 200px
 		border-bottom: 1px solid #ddd
 		input
 			position: absolute
