@@ -3,16 +3,18 @@
 		<div class="page-item">
 			<div class="page-head">
 				<div class="page-head-left" @click="back">&lt;</div>
-				<div class="page-head-center"><span v-if="item">{{item.title}}</span></div>
+				<div class="page-head-center"><span v-if="item">{{item.specs[0].name || item.title}}</span></div>
 				<div class="page-head-right"></div>
 			</div>
 			<div class="item" v-if="item">
 				<div class="item-specs-info">
 					<div class="item-specs" v-for="(specs, index) in item.specs" :key="specs.id" v-if="currentIndex==index">
-						<imageUploader v-model="specs.image"></imageUploader>
+						<div class="item-specs-image">
+							<imageUploader v-model="specs.image"></imageUploader>
+						</div>
 						<div class="item-specs-text">
-							<input class="specs-name" :value="specs.name" placeholder="输入规格名称" @blur="specsNameInput" @keyup.enter="inputEnter">
-							<input class="specs-desc" :value="specs.desc" placeholder="输入商品附注" @blur="specsDescInput" @keyup.enter="inputEnter">
+							<input class="specs-name" :value="specs.name" placeholder="输入名称" @blur="specsNameInput" @keyup.enter="inputEnter">
+							<input class="specs-desc" :value="specs.desc" placeholder="输入附注说明" @blur="specsDescInput" @keyup.enter="inputEnter">
 							<div class="specs-price">
 								<input :value="specs.price" placeHolder="0.00" @blur="specsPriceInput" @keyup.enter="inputEnter">	
 								<div class="yuan">元</div>
@@ -21,7 +23,7 @@
 					</div>
 				</div>
 				<div class="item-specs-selector">
-					<v-touch class="specs-label" :class="{'active': currentIndex==index}" v-for="(specs, index) in item.specs" :key="specs.id" @tap="specsSelect(index)" @press="press" :data-index="index">{{specs.name}}</v-touch>
+					<v-touch class="specs-label" :class="{'active': currentIndex==index}" v-for="(specs, index) in item.specs" :key="specs.id" @tap="specsSelect(index)" @press="specsPress(index)">{{specs.name}}</v-touch>
 					<v-touch class="specs-label specs-label-new" v-on:tap="specsAdd">+</v-touch>
 				</div>
 			</div>
@@ -35,9 +37,9 @@
 				<div class="page-popup-mask" v-if="popup.show" @click="popupCancel"></div>
 				<div class="page-popup-content">
 					<div class="button-list">
-						<div class="button-item">往前移</div>
-						<div class="button-item">往后移</div>
-						<div class="button-item">删除</div>
+						<div class="button-item" @click="specsSort(-1)">往前移</div>
+						<div class="button-item" @click="specsSort(1)">往后移</div>
+						<div class="button-item" @click="specsDelete">删除</div>
 						<div class="button-item button-item-separator"></div>
 						<div class="button-item button-item-cancel" @click="popupCancel">取消</div>
 					</div>
@@ -52,34 +54,10 @@
 	import VueTouch from 'vue-touch'
 	import axios from 'axios'
 	import imageUploader from '@/base/imageUploader/imageUploader'
+	import { setItem } from '@/api/items'
 
 	Vue.use(VueTouch, {name: 'v-touch'})
 	
-	const specs = [
-		{
-			id: 1,
-			name: '大头大青菜',
-			desc: '这是大头的大青菜，不是小头的。',
-			price: '3.80'
-		},
-		{
-			id: 2,
-			name: '小头大青菜'
-		},
-		{
-			id: 3,
-			name: '长杆'
-		},
-		{
-			id: 4,
-			name: '山东大庄'
-		},
-		{
-			id: 5,
-			name: '本地小种'
-		}
-	]
-
 	export default {
 		props: {
 			id: {
@@ -102,17 +80,19 @@
 			}
 		},
 		created() {
-			this.touch = {}
 			if (!this.item) {
 				this.$router.push('/goods')
 				return
 			}
-			Vue.set(this.item, 'specs', specs)
-			Vue.set(this.item, 'descs', "这是一段商品附注说明")
-		},
-		watch: {
-			'$route'(to, from) {
-				console.log(to, from)
+			if(!this.item.specs){
+				let specs = [{
+					id: 1,
+					name: this.item.title,
+					desc: this.item.descs,
+					price: this.item.price,
+					image: this.item.images[0]
+				}]
+				Vue.set(this.item, 'specs', specs)
 			}
 		},
 		methods: {
@@ -140,6 +120,10 @@
 				}, 20)
 			},
 			specsAdd() {
+				let length = this.item.specs.length
+				let lastSpecs = this.item.specs[length-1]
+				if(lastSpecs.name == '未命名') return
+
 				let maxId = 0
 				for(let i in this.item.specs){
 					if(maxId < this.item.specs[i].id){
@@ -154,13 +138,45 @@
 					desc: '',
 					price: ''
 				})
+				this.currentIndex = length
 			},
-			press(e) {
-				console.log('press', e)
-				this.popup.show = true
+			specsPress(index) {
+				this.popup.specsIndex = index
+				if(index > 0) {
+					this.popup.show = true
+				}
+			},
+			specsSort(num) {
+				let index = this.popup.specsIndex
+				let specses = this.item.specs
+				if(num > 0 && index < specses.length){
+					let temp = specses[index]
+					specses[index] = specses[index+1]
+					specses[index+1] = temp
+				}
+				if(num < 0 && index > 1){
+					let temp = specses[index]
+					specses[index] = specses[index-1]
+					specses[index-1] = temp
+				}
+				this.popup.show = false
+			},
+			specsDelete() {
+				let index = this.popup.specsIndex
+				this.item.specs.splice(index, 1)
+				this.currentIndex = 0
+				this.popup.show = false
 			},
 			confirm() {
-				console.log(this.item)
+				let item = this.item
+				let length = item.specs.length
+				if(item.specs[length-1].name=='未命名'){
+					item.specs.pop()
+					if(this.currentIndex == length-1){
+						this.currentIndex = 0
+					}
+				}
+				setItem(this.item, 'update')
 			},
 			cancel() {
 				this.$router.back()
@@ -283,18 +299,51 @@
 		transition: all 0.3s
 	.slide-enter, .slide-leave-to
 		transform: translate3d(100%, 0, 0)
+	input
+		width: 100%
+		outline: none
+		box-sizing: border-box
+	.item-title
+		text-align: center
+		padding: 10px
+
+	.info-image
+		height: 260px
+	.info-text
+		position: relative
+		padding: 10px 10px 0
+		border-bottom: 1px solid #ddd
+		.info-name
+			font-size: 16px
+		.info-desc
+			font-size: 12px
+			color: #888
+			padding: 10px 0
+		.info-price
+			position: absolute
+			top: 50%
+			right: 10px
+			transform: translateY(-50%)
+			display: flex
+			align-items: center
+			width: 100px
+			font-size: 16px
+			input
+				color: #f63
+				font-size: 20px
+				font-weight: 200
+				text-align: right
+				margin-right: 5px
+
 	.item
 		.item-specs-info
 			.item-specs
-				.image-uploader
-					width: 100vw
+				.item-specs-image
+					width: 100%
 					height: 280px
 				.item-specs-text
 					position: relative
 					padding: 10px 10px 0
-					input
-						width: 100%
-						outline: none
 					border-bottom: 1px solid #ddd
 					.specs-name
 						font-size: 16px
@@ -322,17 +371,25 @@
 			flex-wrap: wrap
 			font-size: 12px
 			color: #345
+			min-height: 91px
 			padding: 10px 10px 0
 			border-bottom: 1px solid #ddd
 			.specs-label
-				padding: 8px
+				min-width: 54px
+				height: 30px
+				display: flex
+				align-items: center
+				justify-content: center
+				padding-left: 8px
+				padding-right: 8px
 				margin-right: 8px
-				margin-bottom: 8px
+				margin-bottom: 10px
+				box-sizing: border-box
 				border-radius: 8px
-				min-width: 28px
-				text-align: center
 				border: 1px solid #ddd
 				&.active
 					color: #f63
 					border: 1px solid #f63
+				&:first-child
+					background: #eee
 </style>

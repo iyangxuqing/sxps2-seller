@@ -113,7 +113,7 @@
 	.image-uploader
 		position: relative
 		width: 100%
-		heiht: 100%
+		height: 100%
 		min-width: 100%
 		min-height: 200px
 		border-bottom: 1px solid #ddd
@@ -122,11 +122,12 @@
 			left: -9999px
 		label
 			position: absolute
-			top: 0
-			left: 0
-			right: 0
-			bottom: 0
+			top: 50%
+			left: 50%
 			z-index: 3
+			width: 60%
+			height: 60%
+			transform: translate3d(-50%, -50%, 0)
 		.preview
 			position: absolute
 			top: 0

@@ -3,7 +3,7 @@ import config from './config.js'
 
 export function getCates() {
 	return new Promise(function(resolve, reject){
-		axios.get(config.apiHost + 'cate2.php?m=get').then((res) => {
+		axios.get(config.apiHost + 'seller/cate2.php?m=get').then((res) => {
 			if(res.data.errno === 0) {
 				let cates = []
 				for(let i in res.data.cates){
