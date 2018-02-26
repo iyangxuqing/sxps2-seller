@@ -114,9 +114,14 @@
 	.cates
 		.cates-wrapper
 			padding: 0 20px
+			border-bottom: 1px solid #ddd
 			.cate
 				flex-shrink: 0
-				padding: 10px 10px
+				display: flex
+				align-items: center
+				justify-content: center
+				height: 44px;
+				padding: 10px
 				&:first-child
 					padding-Left: 0
 				&:last-child

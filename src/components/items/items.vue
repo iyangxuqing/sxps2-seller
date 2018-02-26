@@ -9,7 +9,9 @@
 </template>
 
 <script type="text/ecmascript-6">
-	import {getItems} from '@/api/items'
+	import BScroll from 'better-scroll'
+	import { getItems } from '@/api/items'
+
 	export default {
 		props: {
 			cid: {
@@ -65,6 +67,8 @@
 		display: flex
 		flex-wrap: wrap
 		padding: 20px
+		height: 100%
+		overflow: hidden
 		.item
 			width: calc((100vw - 80px)/3)
 			margin-bottom: 10px

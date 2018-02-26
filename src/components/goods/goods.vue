@@ -1,7 +1,11 @@
 <template>
 	<div class="goods">
-		<cates @changeCate="onChangeCate"></cates>
-		<items :cid="cid"></items>
+		<div class="cates-container">
+			<cates @changeCate="onChangeCate"></cates>
+		</div>
+		<div class="items-container">
+			<items :cid="cid"></items>	
+		</div>
 	</div>
 </template>
 
@@ -28,4 +32,10 @@
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
+	.goods
+		height: 100vh
+		.cates-container
+			height: 90px
+		.items-container
+			height: calc(100% - 90px)
 </style>
