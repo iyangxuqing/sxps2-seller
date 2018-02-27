@@ -12,20 +12,28 @@
 
 	export default {
  		model: {
-      prop: 'imageUrl',
-      event: 'image-changed'
+      prop: 'image',
+      event: 'change'
     },		
 		props: {
-			imageUrl: {
+			image: {
 				type: String,
 				default: ''
 			}
 		},
 	  data () {
 	    return {
-	      image: '',
+	      imageUrl: '',
 	      placeholder: '点击选择图片'
 	    }
+	  },
+	  created() {
+  		this.imageUrl = this.image
+	  },
+	  watch: {
+	  	image() {
+	  		this.imageUrl = this.image
+	  	}
 	  },
 	  methods: {
 	  	change(e) {
@@ -50,10 +58,12 @@
             //判断图片是否大于100K,是就直接上传，反之压缩图片
             if (this.result.length <= (100 * 1024)) {
               let dataURL = this.result
+              self.imageUrl = dataURL
               self._imgPost(dataURL, file.name)
             } else {
             	img.onload = function() {
                 let dataURL = self._compress(img)
+                self.imageUrl = dataURL
                 self._imgPost(dataURL, file.name)
             	}
             }
@@ -66,7 +76,7 @@
 	      	dataURL: dataURL,
 	      	fileName: fileName,
 	      	success: function(res) {
-	      		self.$emit('image-changed', res.url)
+	      		self.$emit('change', res.url)
 	      	}
 	      })
 	    },
@@ -122,12 +132,11 @@
 			left: -9999px
 		label
 			position: absolute
-			top: 50%
-			left: 50%
+			top: 0
+			left: 0
 			z-index: 3
-			width: 60%
-			height: 60%
-			transform: translate3d(-50%, -50%, 0)
+			width: 100%
+			height: 100%
 		.preview
 			position: absolute
 			top: 0

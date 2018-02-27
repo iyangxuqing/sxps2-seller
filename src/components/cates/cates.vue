@@ -122,6 +122,7 @@
 				justify-content: center
 				height: 44px;
 				padding: 10px
+				cursor: pointer
 				&:first-child
 					padding-Left: 0
 				&:last-child

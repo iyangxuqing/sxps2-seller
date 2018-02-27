@@ -3,25 +3,27 @@
 		<div class="page-item">
 			<div class="page-head">
 				<div class="page-head-left" @tap="back"><i class="icon-back"></i></div>
-				<div class="page-head-center"><span v-if="item">{{item.title}}</span></div>
+				<div class="page-head-center"><span v-if="item">{{item.specs[0].name}}</span></div>
 				<div class="page-head-right"></div>
 			</div>
 			<div class="item" v-if="item">
-				<div class="item-edit">
-					<div class="item-edit-image">
-						<imageUploader v-model="editImage" @change="imageInput"></imageUploader>
-					</div>
-					<div class="item-edit-text">
-						<input class="title" :value="editTitle" placeholder="输入名称" @blur="titleInput" @keyup.enter="inputEnter">
-						<input class="descs" :value="editDescs" placeholder="输入附注说明" @blur="descsInput" @keyup.enter="inputEnter">
-						<div class="price">
-							<input :value="editPrice" placeHolder="0.00" @blur="priceInput" @keyup.enter="inputEnter">	
-							<div class="yuan">元</div>
+				<div class="item-specs-info">
+					<div class="item-specs" v-for="(specs, index) in item.specs" :key="specs.id" v-if="currentIndex==index">
+						<div class="item-specs-image">
+							<imageUploader v-model="specs.image"></imageUploader>
+						</div>
+						<div class="item-specs-text">
+							<input class="specs-name" :value="specs.name" placeholder="输入名称" @blur="specsNameInput" @keyup.enter="inputEnter">
+							<input class="specs-desc" :value="specs.desc" placeholder="输入附注说明" @blur="specsDescInput" @keyup.enter="inputEnter">
+							<div class="specs-price">
+								<input :value="specs.price" placeHolder="0.00" @blur="specsPriceInput" @keyup.enter="inputEnter">	
+								<div class="yuan">元</div>
+							</div>
 						</div>
 					</div>
 				</div>
 				<div class="item-specs-selector">
-					<v-touch class="specs-label" :class="{'active': currentIndex==index}" v-for="(specs, index) in item.specs" :key="specs.id" @tap="specsSelect(index)" @press="specsPress(index)">{{specs.title || '未命名'}}</v-touch>
+					<v-touch class="specs-label" :class="{'active': currentIndex==index}" v-for="(specs, index) in item.specs" :key="specs.id" @tap="specsSelect(index)" @press="specsPress(index)">{{specs.name}}</v-touch>
 					<v-touch class="specs-label specs-label-new" v-on:tap="specsAdd">+</v-touch>
 				</div>
 			</div>
@@ -72,118 +74,72 @@
 		data() {
 			return {
 				currentIndex: 0,
-				editTitle: '',
-				editDescs: '',
-				editPrice: '',
-				editImage: '',
 				popup: {
 					show: false
 				}
 			}
 		},
 		created() {
+			console.log('item created', this.item)
 			if (!this.item) {
 				this.$router.push('/goods')
 				return
 			}
-			this.currentIndex = -1
-			this.editTitle = this.item.title
-			this.editDescs = this.item.descs
-			this.editPrice = this.item.price
-			this.editImage = this.item.image
 			if(!this.item.specs){
-				Vue.set(this.item, 'specs', [])
-			}
-		},
-		computed: {
-
-		},
-		watch: {
-			currentIndex() {
-				let i = this.currentIndex
-				if(i < 0) {
-					this.editTitle = this.item.title
-					this.editDescs = this.item.descs
-					this.editPrice = this.item.price
-					this.editImage = this.item.image
-				} else {
-					this.editTitle = this.item.specs[i].title
-					this.editDescs = this.item.specs[i].descs
-					this.editPrice = this.item.specs[i].price
-					this.editImage = this.item.specs[i].image
-				}
+				let specs = [{
+					id: 1,
+					name: this.item.title,
+					desc: this.item.descs,
+					price: this.item.price,
+					image: this.item.images && this.item.images[0]
+				}]
+				Vue.set(this.item, 'specs', specs)
 			}
 		},
 		methods: {
 			inputEnter(e) {
 				e.target.blur()
 			},
-			titleInput(e) {
+			specsNameInput(e) {
 				let value = e.target.value
 				let index = this.currentIndex
-				this.editTitle = value
-				if(index < 0) {
-					this.item.title = value
-				} else {
-					this.item.specs[index].title = value
-				}
+				this.item.specs[index].name = value
 			},
-			descsInput(e) {
+			specsDescInput(e) {
 				let value = e.target.value
 				let index = this.currentIndex
-				this.editDescs = value
-				if(index < 0) {
-					this.item.descs = value
-				} else {
-					this.item.specs[index].descs = value
-				}
+				this.item.specs[index].desc = value
 			},
-			priceInput(e) {
+			specsPriceInput(e) {
 				let value = e.target.value
 				let index = this.currentIndex
-				this.editPrice = value
-				if(index < 0) {
-					this.item.price = value
-				} else {
-					this.item.specs[index].price = value
-				}
-			},
-			imageInput(image) {
-				let index = this.currentIndex
-				if(index < 0) {
-					this.item.image = image
-				} else {
-					this.item.specs[index].image = image
-				}
+				this.item.specs[index].price = value
 			},
 			specsSelect(index) {
 				setTimeout(() => {
-					if(this.currentIndex == index) {
-						this.currentIndex = -1
-					} else {
-						this.currentIndex = index
-					}
+					this.currentIndex = index
 				}, 20)
 			},
 			specsAdd() {
-				let specs = this.item.specs
-				if(specs.length && specs[specs.length-1].title=='') return
+				let length = this.item.specs.length
+				let lastSpecs = this.item.specs[length-1]
+				if(lastSpecs.name == '未命名') return
 
-				let newId = 0
+				let maxId = 0
 				for(let i in this.item.specs){
-					if(newId < this.item.specs[i].id){
-						newId = this.item.specs[i].id
+					if(maxId < this.item.specs[i].id){
+						maxId = this.item.specs[i].id
 					}
 				}
-				newId += 1
+				let newId = maxId + 1
 				this.item.specs.push({
 					id: newId,
 					image: '',
-					title: '',
-					descs: '',
+					name: '未命名',
+					desc: '',
 					price: ''
 				})
-				this.currentIndex = specs.length - 1
+				this.currentIndex = length
 			},
 			specsPress(index) {
 				this.popup.specsIndex = index
@@ -215,7 +171,7 @@
 			confirm() {
 				let item = this.item
 				let length = item.specs.length
-				if(item.specs[length-1].title=='未命名'){
+				if(item.specs[length-1].name=='未命名'){
 					item.specs.pop()
 					if(this.currentIndex == length-1){
 						this.currentIndex = 0
@@ -386,35 +342,36 @@
 				margin-right: 5px
 
 	.item
-		.item-edit
-			.item-edit-image
-				width: 100%
-				height: 280px
-			.item-edit-text
-				position: relative
-				padding: 12px 10px 0
-				border-bottom: 1px solid #ddd
-				.title
-					font-size: 16px
-				.descs
-					font-size: 12px
-					color: #888
-					padding: 12px 0
-				.price
-					position: absolute
-					top: 50%
-					right: 10px
-					transform: translateY(-50%)
-					display: flex
-					align-items: center
-					width: 100px
-					font-size: 16px
-					input
-						color: #f63
-						font-size: 20px
-						font-weight: 200
-						text-align: right
-						margin-right: 5px
+		.item-specs-info
+			.item-specs
+				.item-specs-image
+					width: 100%
+					height: 280px
+				.item-specs-text
+					position: relative
+					padding: 10px 10px 0
+					border-bottom: 1px solid #ddd
+					.specs-name
+						font-size: 16px
+					.specs-desc
+						font-size: 12px
+						color: #888
+						padding: 10px 0
+					.specs-price
+						position: absolute
+						top: 50%
+						right: 10px
+						transform: translateY(-50%)
+						display: flex
+						align-items: center
+						width: 100px
+						font-size: 16px
+						input
+							color: #f63
+							font-size: 20px
+							font-weight: 200
+							text-align: right
+							margin-right: 5px
 		.item-specs-selector
 			display: flex
 			flex-wrap: wrap
@@ -439,4 +396,6 @@
 				&.active
 					color: #f63
 					border: 1px solid #f63
+				&:first-child
+					background: #eee
 </style>
