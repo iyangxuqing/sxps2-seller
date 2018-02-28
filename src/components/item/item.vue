@@ -21,8 +21,8 @@
 					</div>
 				</div>
 				<div class="item-specs-selector">
-					<v-touch class="specs-label" :class="{'active': currentIndex==index}" v-for="(specs, index) in item.specs" :key="specs.id" @tap="specsSelect(index)" @press="specsPress(index)">{{specs.title || '未命名'}}</v-touch>
-					<v-touch class="specs-label specs-label-new" v-on:tap="specsAdd">+</v-touch>
+					<div class="specs-label" :class="{'active': currentIndex==index}" v-for="(specs, index) in item.specs" :key="specs.id" @tap="specsTap(index)" @touchstart="specsPressDown(index)" @endstart="specsPressUp" @mousedown="specsPressDown(index)" @mouseup="specsPressUp">{{specs.title || '未命名'}}</div>
+					<div class="specs-label specs-label-new" @tap="specsAdd">+</div>
 				</div>
 			</div>
 			<div class="page-foot">
@@ -31,31 +31,18 @@
 					<div class="button confirm" @tap="confirm">保 存</div>
 				</div>
 			</div>
-			<div class="page-popup" :class="{'show': popup.show}">
-				<div class="page-popup-mask" v-if="popup.show" @tap="popupCancel"></div>
-				<div class="page-popup-content">
-					<div class="button-list">
-						<div class="button-item" @tap="specsSort(-1)">往前移</div>
-						<div class="button-item" @tap="specsSort(1)">往后移</div>
-						<div class="button-item" @tap="specsDelete">删除</div>
-						<div class="button-item button-item-separator"></div>
-						<div class="button-item button-item-cancel" @tap="popupCancel">取消</div>
-					</div>
-				</div>
-			</div>
+			<actionsheet v-model="actionsheetShow" :items="['往前移', '往后移', '删除']" @action="specsAction"></actionsheet>
 		</div>
 	</transition>
 </template>
 
 <script type="text/ecmascript-6">
 	import Vue from 'vue'
-	import VueTouch from 'vue-touch'
 	import axios from 'axios'
 	import imageUploader from '@/base/imageUploader/imageUploader'
+	import actionsheet from '@/components/actionsheet/actionsheet'
 	import { setItem } from '@/api/items'
 
-	Vue.use(VueTouch, {name: 'v-touch'})
-	
 	export default {
 		props: {
 			id: {
@@ -64,9 +51,7 @@
 			},
 			item: {
 				type: Object,
-				default: function (){
-        	return null
-  			}
+				default: null
 			}
 		},
 		data() {
@@ -76,9 +61,7 @@
 				editDescs: '',
 				editPrice: '',
 				editImage: '',
-				popup: {
-					show: false
-				}
+				actionsheetShow: false
 			}
 		},
 		created() {
@@ -94,9 +77,6 @@
 			if(!this.item.specs){
 				Vue.set(this.item, 'specs', [])
 			}
-		},
-		computed: {
-
 		},
 		watch: {
 			currentIndex() {
@@ -156,7 +136,7 @@
 					this.item.specs[index].image = image
 				}
 			},
-			specsSelect(index) {
+			specsTap(index) {
 				setTimeout(() => {
 					if(this.currentIndex == index) {
 						this.currentIndex = -1
@@ -169,15 +149,8 @@
 				let specs = this.item.specs
 				if(specs.length && specs[specs.length-1].title=='') return
 
-				let newId = 0
-				for(let i in this.item.specs){
-					if(newId < this.item.specs[i].id){
-						newId = this.item.specs[i].id
-					}
-				}
-				newId += 1
 				this.item.specs.push({
-					id: newId,
+					id: Date.now(),
 					image: '',
 					title: '',
 					descs: '',
@@ -185,32 +158,37 @@
 				})
 				this.currentIndex = specs.length - 1
 			},
-			specsPress(index) {
-				this.popup.specsIndex = index
-				if(index > 0) {
-					this.popup.show = true
-				}
+			specsPressDown(index) {
+				this.specsPressTimer = setTimeout(() => {
+					this.specsLongTap && this.specsLongTap(index)
+				}, 500)
 			},
-			specsSort(num) {
-				let index = this.popup.specsIndex
-				let specses = this.item.specs
-				if(num > 0 && index < specses.length){
-					let temp = specses[index]
-					specses[index] = specses[index+1]
-					specses[index+1] = temp
-				}
-				if(num < 0 && index > 1){
-					let temp = specses[index]
-					specses[index] = specses[index-1]
-					specses[index-1] = temp
-				}
-				this.popup.show = false
+			specsPressUp() {
+				clearTimeout(this.specsPressTimer)
 			},
-			specsDelete() {
-				let index = this.popup.specsIndex
-				this.item.specs.splice(index, 1)
-				this.currentIndex = 0
-				this.popup.show = false
+			specsLongTap(index) {
+				this.specsSelectedIndex = index
+				this.actionsheetShow = !this.actionsheetShow
+			},
+			specsAction(item, index) {
+				let i = this.specsSelectedIndex
+				let specs = this.item.specs
+				if(index == 0) { // 往前移
+					if(i > 0) {
+						let temp = specs[i]
+						specs[i] = specs[i - 1]
+						specs[i - 1] = temp
+					}
+				} else if(index == 1) { // 往后移
+					if(i < specs.length - 1) {
+						let temp = specs[i]
+						specs[i] = specs[i + 1]
+						specs[i + 1] = temp
+					}
+				} else if(index == 2) { // 删除
+					specs.splice(i, 1)
+					this.currentIndex = -1
+				}
 			},
 			confirm() {
 				let item = this.item
@@ -222,20 +200,17 @@
 					}
 				}
 				// setItem(this.item, 'update')
-				this.$emit('itemUpdate', item)
 			},
 			cancel() {
 				this.$router.back()
 			},
 			back() {
 				this.$router.back()
-			},
-			popupCancel() {
-				this.popup.show = false
 			}
 		},
 		components: {
-			imageUploader
+			imageUploader,
+			actionsheet
 		}
 	}
 </script>
@@ -328,27 +303,28 @@
 				width: 100%
 				height: 100%
 				background-color: #fff
-		.button-list
-			width: 100%
-			.button-item
-				display: flex
-				align-items: center
-				justify-content: center
-				width: 100%
-				height: 50px
-				color: #345
-				letter-spacing: 2px
-				border-bottom: 1px solid #eee
-			.button-item-separator
-				height: 10px
-				background: #eee
-			.button-item-cancel
-				color: #f63
+				.button-list
+					width: 100%
+					.button-item
+						display: flex
+						align-items: center
+						justify-content: center
+						width: 100%
+						height: 50px
+						color: #345
+						letter-spacing: 2px
+						border-bottom: 1px solid #eee
+					.button-item-separator
+						height: 10px
+						background: #eee
+					.button-item-cancel
+						color: #f63
 
 	.slide-enter-active, .slide-leave-active
 		transition: all 0.3s
 	.slide-enter, .slide-leave-to
 		transform: translate3d(100%, 0, 0)
+
 	input
 		width: 100%
 		outline: none
@@ -356,34 +332,6 @@
 	.item-title
 		text-align: center
 		padding: 10px
-
-	.info-image
-		height: 260px
-	.info-text
-		position: relative
-		padding: 10px 10px 0
-		border-bottom: 1px solid #ddd
-		.info-name
-			font-size: 16px
-		.info-desc
-			font-size: 12px
-			color: #888
-			padding: 10px 0
-		.info-price
-			position: absolute
-			top: 50%
-			right: 10px
-			transform: translateY(-50%)
-			display: flex
-			align-items: center
-			width: 100px
-			font-size: 16px
-			input
-				color: #f63
-				font-size: 20px
-				font-weight: 200
-				text-align: right
-				margin-right: 5px
 
 	.item
 		.item-edit
@@ -436,6 +384,7 @@
 				box-sizing: border-box
 				border-radius: 8px
 				border: 1px solid #ddd
+				cursor: pointer
 				&.active
 					color: #f63
 					border: 1px solid #f63

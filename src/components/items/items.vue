@@ -85,9 +85,9 @@
 				this.itemPressTimer = setTimeout(() => {
 					this.itemLongPress = true
 					this.itemLongTap && this.itemLongTap(item)
-				}, 1000)
+				}, 500)
 			},
-			itemPressUp(item) {
+			itemPressUp() {
 				clearTimeout(this.itemPressTimer)
 			},
 			itemLongTap(item) {

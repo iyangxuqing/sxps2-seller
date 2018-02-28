@@ -1,9 +1,9 @@
 <template>  
   <div class="image-uploader">
-  	<div class="preview" :style="'backgroundImage:url('+imageUrl+')'"></div>
+  	<div class="preview" :style="'backgroundImage:url('+image+')'"></div>
  		<input type="file" id="upload" accept="image/png,image/jpeg,image/jpg,image/gif" @change="change">
  		<label for="upload"></label>
- 		<div class="placeholder" v-if="!imageUrl">{{placeholder}}</div>
+ 		<div class="placeholder" v-if="!image">{{placeholder}}</div>
   </div>  
 </template>
 
@@ -26,14 +26,6 @@
 	      imageUrl: '',
 	      placeholder: '点击选择图片'
 	    }
-	  },
-	  created() {
-  		this.imageUrl = this.image
-	  },
-	  watch: {
-	  	image() {
-	  		this.imageUrl = this.image
-	  	}
 	  },
 	  methods: {
 	  	change(e) {
@@ -58,14 +50,12 @@
             //判断图片是否大于100K,是就直接上传，反之压缩图片
             if (this.result.length <= (100 * 1024)) {
               let dataURL = this.result
-              self.imageUrl = dataURL
               self._imgPost(dataURL, file.name)
             } else {
             	img.onload = function() {
                 let dataURL = self._compress(img)
-                self.imageUrl = dataURL
-                self._imgPost(dataURL, file.name)
-            	}
+               	self._imgPost(dataURL, file.name)
+             	}
             }
           }
         }
