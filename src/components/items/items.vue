@@ -11,9 +11,9 @@
 				</div>
 			</div>
 		</div>
-		<router-view @itemUpdate="itemUpdate"></router-view>
+		<router-view></router-view>
 	</div>
-</template>
+ </template>
 
 <script type="text/ecmascript-6">
 	import BScroll from 'better-scroll'
@@ -26,12 +26,12 @@
 				default: ''
 			}
 		},
-		data() {
-			return {
-				items: [],
-				ready: false
-			}
-		},
+	 	data() {
+	 		return {
+	 			items: () => [],
+	 			ready: false
+	 		}
+ 		},
 		created() {
 			getItems().then((items) => {
 				this.items = items
@@ -53,22 +53,6 @@
 			}
 		},
 		methods: {
-			itemUpdate(item) {
-				console.log('itemUpdate', item)
-				// let find = false
-				// for(let i in this.items) {
-				// 	if(this.items[i].id == item.id) {
-				// 		this.items[i] = item
-				// 		find = true
-				// 		break
-				// 	}
-				// }
-				// if(!find) {
-				// 	console.log('not find')
-				// 	this.items.push(item)
-				// }
-				this.items.push(item)
-			},
 			_initScroll() {
 				setTimeout(()=>{
 					if(!this.scroll) {
