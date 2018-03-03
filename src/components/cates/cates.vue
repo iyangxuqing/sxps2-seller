@@ -3,55 +3,76 @@
 		<div class="cates">
 			<div class="cates-wrapper" v-if="cates.length">
 				<HScroll :data="cates">
-					<div class="cate" v-for="cate in cates" :class="{active: cate.active}" @click="onCateClick(cate)">{{cate.title}}</div>
-					<input class="cate-input" v-model="cate1Title" placeholder="新增" @keyup.enter="onCateAdd({pid: 0})" @blur="onCateAdd({pid: 0})" ref="cate1Input">
+					<div class="cate" v-for="cate in cates" :class="{active: cate.active}" @tap="cateTap(cate)" @longtap="cateLongtap(cate)">{{cate.title}}</div>
+					<input class="cate-input" v-model="cate1Title" placeholder="新增" @keyup.enter="inputEnter" @blur="cateAdd({pid: 0})">
 				</HScroll>
 			</div>
 			<div class="cates-wrapper" v-for="cate in cates" v-if="cate.active">
 				<HScroll :data="cate.children">
-					<div class="cate" v-for="child in cate.children" :class="{active: child.active}" @click="onCateClick(child)">{{child.title}}</div>
-					<input class="cate-input" v-model="cate2Title" placeholder="新增" @keyup.enter="onCateAdd({pid: cate.id})" @blur="onCateAdd({pid: cate.id})" ref="cate2Input">
+					<div class="cate" v-for="child in cate.children" :class="{active: child.active}" @tap="cateTap(child)" @longtap="cateLongtap(child)">{{child.title}}</div>
+					<input class="cate-input" v-model="cate2Title" placeholder="新增" @keyup.enter="inputEnter" @blur="cateAdd({pid: cate.id})">
 				</HScroll>
 			</div>
 		</div>
+		<CateEditor v-model="cateEditorShow" :cate="editCate" :cates="cates"></CateEditor>
 	</div>
 </template>
 
 <script type="text/ecmascript-6">
 	import {getCates} from '@/api/cates'
 	import HScroll from '@/base/hscroll/hscroll'
+	import CateEditor from './cate-editor'
 
 	export default {
 		data() {
 			return {
 				cates: [],
 				cate1Title: '',
-				cate2Title: ''
+				cate2Title: '',
+				editCate: {},
+				cateEditorShow: false
 			}
 		},
 		created() {
 			getCates().then((cates) => {
 				this.cates = cates
+				let selectedCate = null
 				for(let i in this.cates){
 					if(this.cates[i].active == true) {
 						for(let j in this.cates[i].children){
 							if(this.cates[i].children[j].active == true) {
-								this.$emit('changeCate', this.cates[i].children[j])
+								selectedCate = this.cates[i].children[j]
 								break
 							}
 						}
 						break
 					}
 				}
+				this.$emit('change', selectedCate)
 			})
 		},
+		watch: {
+			cates: {
+				handler: function(val, oldVal) {
+					console.log('watch cates')
+				},
+				deep: true
+			}
+		},
 		methods: {
-			onCateAdd({pid}) {
+			inputEnter(e) {
+				e.target.blur()
+			},
+			cateAdd({pid}) {
 				if (pid == 0) {
 					if(!this.cate1Title) return
 					this.cates.push({
+						id: String(Date.now()),
 						pid: pid,
-						title: this.cate1Title
+						title: this.cate1Title,
+						children: [],
+						sort: Date.now(),
+						active: false
 					})
 					this.cate1Title = ''
 				} else {
@@ -59,18 +80,19 @@
 					for(let i in this.cates){
 						if(this.cates[i].id==pid){
 							this.cates[i].children.push({
+								id: String(Date.now()),
 								pid: pid,
-								title: this.cate2Title
+								title: this.cate2Title,
+								sort: Date.now(),
+								active: false
 							})
 							this.cate2Title = ''
+							break
 						}
-						break
 					}
 				}
-				this.$refs.cate1Input.blur()
-				this.$refs.cate2Input[0].blur()
 			},
-			onCateClick(cate) {
+			cateTap(cate) {
 				if (cate.pid==0) {
 					for(let i in this.cates) {
 						this.cates[i].active = false
@@ -91,21 +113,28 @@
 						}
 					}
 				}
+				let selectedCate = null
 				for(let i in this.cates){
 					if(this.cates[i].active == true) {
 						for(let j in this.cates[i].children){
 							if(this.cates[i].children[j].active == true) {
-								this.$emit('changeCate', this.cates[i].children[j])
+								selectedCate = this.cates[i].children[j]
 								break
 							}
 						}
 						break
 					}
 				}
+				this.$emit('change', selectedCate)
+			},
+			cateLongtap(cate) {
+				this.editCate = cate
+				this.cateEditorShow = true
 			}
 		},
 		components: {
-			HScroll
+			HScroll,
+			CateEditor
 		}
 	}
 </script>

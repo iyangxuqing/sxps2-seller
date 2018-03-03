@@ -1,11 +1,11 @@
 <template>
 	<div class="items" ref="items">
 		<div class="items-wrapper">
-			<div class="item" v-for="item in categoryItems" @tap="itemTap(item)" @touchstart="itemPressDown(item)" @touchend="itemPressUp" @mousedown="itemPressDown(item)" @mouseup="itemPressUp">
+			<div class="item" v-for="item in categoryItems" @tap="itemTap(item)" @longtap="itemLongTap(item)">
 				<div class="item-image"><img :src="item.image"></div>
 				<div class="item-title">{{item.title}}</div>
 			</div>
-			<div class="item item-new" @tap="itemTap({id:''})" v-if="ready">
+			<div class="item item-new" @tap="itemTap({id:''})" v-if="cid">
 				<div class="item-image">
 					<img src="@/common/image/plus.png">
 				</div>
@@ -16,7 +16,8 @@
  </template>
 
 <script type="text/ecmascript-6">
-	import BScroll from 'better-scroll'
+	// import BScroll from 'better-scroll'
+	import BScroll from '@/base/better-scroll/src/index'
 	import { getItems } from '@/api/items'
 
 	export default {
@@ -58,6 +59,7 @@
 					if(!this.scroll) {
 						this.scroll = new BScroll(this.$refs.items, {
 							tap: true,
+							longtap: true,
 							click: true
 						})
 					} else {

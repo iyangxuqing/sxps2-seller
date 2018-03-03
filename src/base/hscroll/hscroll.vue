@@ -8,13 +8,14 @@
 
 <script type="text/ecmascript-6">
 	import { addClass } from '@/common/js/dom'
-  import BScroll from 'better-scroll'
+  // import BScroll from 'better-scroll'
+  import BScroll from '@/base/better-scroll/src/index'
 
   export default {
   	props: {
   		data : {
   			type: Array,
-  			default: []
+  			default: () => []
   		}
   	},
     created() {
@@ -52,6 +53,8 @@
 
 					if (!this.hscroll) {
 						this.hscroll = new BScroll(this.$refs.hscroll, {
+							tap: true,
+							longtap: true,
 							click: true,
 							scrollX: true,
 							scrollY: false,

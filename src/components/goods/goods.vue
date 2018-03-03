@@ -1,7 +1,7 @@
 <template>
 	<div class="goods">
 		<div class="cates-container">
-			<cates @changeCate="onChangeCate"></cates>
+			<cates @change="onChangeCate"></cates>
 		</div>
 		<div class="items-container">
 			<items :cid="cid"></items>	
@@ -21,7 +21,7 @@
 		},
 		methods: {
 			onChangeCate(cate) {
-				this.cid = cate.id
+				this.cid = cate && cate.id
 			}
 		},
 		components: {

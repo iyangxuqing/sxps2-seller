@@ -101,13 +101,13 @@ Vue.directive('tap', {
     	}
     },
     update: function(el, binding) {
-    	if(isPc()) {
-	      el.addEventListener('mousedown', function(e) { mousedown(e, binding) }, false)
-	      el.addEventListener('mouseup', function(e) { mouseup(e, binding) }, false)
-    	} else {
-	      el.addEventListener('touchstart', function(e) { touchstart(e, binding) }, false)
-	      el.addEventListener('touchend', function(e) { touchend(e, binding) }, false)
-    	}
+    	// if(isPc()) {
+	    //   el.addEventListener('mousedown', function(e) { mousedown(e, binding) }, false)
+	    //   el.addEventListener('mouseup', function(e) { mouseup(e, binding) }, false)
+    	// } else {
+	    //   el.addEventListener('touchstart', function(e) { touchstart(e, binding) }, false)
+	    //   el.addEventListener('touchend', function(e) { touchend(e, binding) }, false)
+    	// }
     }	
 })
 
@@ -122,12 +122,12 @@ Vue.directive('longtap', {
     	}
     },
     update: function(el, binding) {
-    	if(isPc()) {
-	      el.addEventListener('mousedown', function(e) { mousedown(e, binding) }, false)
-	      el.addEventListener('mouseup', function(e) { mouseup(e, binding) }, false)
-    	} else {
-	      el.addEventListener('touchstart', function(e) { touchstart(e, binding) }, false)
-	      el.addEventListener('touchend', function(e) { touchend(e, binding) }, false)
-    	}
+    	// if(isPc()) {
+	    //   el.addEventListener('mousedown', function(e) { mousedown(e, binding) }, false)
+	    //   el.addEventListener('mouseup', function(e) { mouseup(e, binding) }, false)
+    	// } else {
+	    //   el.addEventListener('touchstart', function(e) { touchstart(e, binding) }, false)
+	    //   el.addEventListener('touchend', function(e) { touchend(e, binding) }, false)
+    	// }
     }	
 })

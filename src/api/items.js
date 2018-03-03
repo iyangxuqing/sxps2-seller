@@ -7,6 +7,7 @@ export function getItems() {
 			if(res.data.errno === 0) {
 				let items = res.data.items
         for (let i in items) {
+        	items[i].cid = Number(items[i].cid)
         	items[i].image = items[i].images[0]
           items[i].price = Number(items[i].price).toFixed(2)
         }
