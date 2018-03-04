@@ -1,7 +1,7 @@
 <template>
 	<div class="items" ref="items">
 		<div class="items-wrapper">
-			<div class="item" v-for="item in categoryItems" @tap="itemTap(item)" @longtap="itemLongTap(item)">
+			<div class="item" v-for="item in categoryItems" v-if="item.title" @tap="itemTap(item)" @longtap="itemLongTap(item)">
 				<div class="item-image"><img :src="item.image"></div>
 				<div class="item-title">{{item.title}}</div>
 			</div>
@@ -12,6 +12,7 @@
 			</div>
 		</div>
 		<router-view></router-view>
+		<ItemsEditor v-model="itemsEditorShow" :item="editItem" :items="items"></ItemsEditor>
 	</div>
  </template>
 
@@ -19,6 +20,7 @@
 	// import BScroll from 'better-scroll'
 	import BScroll from '@/base/better-scroll/src/index'
 	import { getItems } from '@/api/items'
+	import ItemsEditor from './items-editor'
 
 	export default {
 		props: {
@@ -29,7 +31,9 @@
 		},
 	 	data() {
 	 		return {
-	 			items: () => [],
+	 			items: [],
+	 			editItem: {},
+	 			itemsEditorShow: false,
 	 			ready: false
 	 		}
  		},
@@ -46,7 +50,7 @@
 			'$route'(to, from) {
 				if(to.path == '/goods') {
 					for(let i in this.items) {
-						if(this.items[i].title=='新建商品'){
+						if(this.items[i].title===''){
 							this.items.splice(i, 1)
 						}
 					}
@@ -67,34 +71,16 @@
 					}
 				}, 20)
 			},
-			itemPressDown(item) {
-				this.itemPressTimer = setTimeout(() => {
-					this.itemLongPress = true
-					this.itemLongTap && this.itemLongTap(item)
-				}, 500)
-			},
-			itemPressUp() {
-				clearTimeout(this.itemPressTimer)
-			},
-			itemLongTap(item) {
-				console.log('itemLongTap', item)
-			},
 			itemTap(item) {
-				if(this.itemLongPress) {
-					this.itemLongPress = false
-					return
-				}
 				if(item.id==='') {
 					item = {
-						id: 'i' + Date.now(),
+						id: '' + Date.now(),
 						cid: this.cid,
-						specs: [{
-							id: 1,
-							name: '新建商品',
-							desc: '',
-							price: '',
-							image: ''
-						}]
+						title: '',
+						image: '',
+						descs: '',
+						price: '',
+						specs: []
 					}
 					this.items.push(item)
 				}
@@ -105,6 +91,11 @@
 						item: item
 					}
 				})
+			},
+			itemLongTap(item) {
+				console.log('itemLongTap', item)
+				this.editItem = item
+				this.itemsEditorShow = true
 			}
 		},
 		computed: {
@@ -118,6 +109,9 @@
 				this.scroll && this.scroll.scrollTo(0, 0)
 				return _items
 			}
+		},
+		components: {
+			ItemsEditor
 		}
 	}
 </script>

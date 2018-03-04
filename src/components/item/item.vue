@@ -3,7 +3,7 @@
 		<div class="page-item">
 			<div class="page-head">
 				<div class="page-head-left" @tap="back"><i class="icon-back"></i></div>
-				<div class="page-head-center"><span v-if="item">{{item.title}}</span></div>
+				<div class="page-head-center"><span v-if="item">{{item.title || '新建商品'}}</span></div>
 				<div class="page-head-right"></div>
 			</div>
 			<div class="item" v-if="item">
@@ -31,7 +31,6 @@
 					<div class="button confirm" @tap="confirm">保 存</div>
 				</div>
 			</div>
-			<actionsheet v-model="actionsheetShow" :items="['往前移', '往后移', '删除']" @action="specsAction"></actionsheet>
 		</div>
 	</transition>
 </template>
@@ -40,7 +39,6 @@
 	import Vue from 'vue'
 	import axios from 'axios'
 	import imageUploader from '@/base/imageUploader/imageUploader'
-	import actionsheet from '@/components/actionsheet/actionsheet'
 	import { setItem } from '@/api/items'
 
 	export default {
@@ -209,8 +207,7 @@
 			}
 		},
 		components: {
-			imageUploader,
-			actionsheet
+			imageUploader
 		}
 	}
 </script>
