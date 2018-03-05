@@ -3,7 +3,7 @@
 		<div class="actionsheet-mask" v-if="height"></div>
 		<div class="actionsheet-list">
 			<div class="actionsheet-item">
-				<div class="input"><input v-model="item.title" @keyup.enter="inputEnter" @blur="inputBlur"></div>
+				<div class="input"><input :value="item.title" placeholder="名称不可为空" ref="input" @keyup.enter="inputEnter" @blur="inputBlur"></div>
 			</div>
 			<div class="actionsheet-item" @click="action(item, 0)">往前移</div>
 			<div class="actionsheet-item" @click="action(item, 1)">往后移</div>
@@ -15,6 +15,8 @@
 </template>
 
 <script type="text/ecmascript-6">
+	import { setItem, delItem } from '@/api/items'
+	import Alert from '@/base/alert/alert'
 
 	export default {
  		model: {
@@ -89,25 +91,42 @@
 				/* 往前移 */
 				if (index==0) {
 					this._sortUp(item, this.items)
+					setItem(item, 'sortUp')
 				}
 				/* 往后移 */
 				else if (index == 1) {
 					this._sortDown(item, this.items)
+					setItem(item, 'sortDown')
 				}
 				/* 删除 */
 				else if (index == 2) {
 					this._delete(item, this.items)
+					setItem(item, 'delete')
 				}
 				this.$emit('action', item, index)
 				this.$emit('change', false)
 			},
-			cancel() {
-				this.$emit('change', false)
-			},
+			/* 重命名 */
 			inputEnter(e) {
 				e.target.blur()
 			},
+			/* 重命名 */
 			inputBlur(e) {
+				let value = this.$refs.input.value
+				if(!value) {
+					e.target.focus()
+					return
+				}
+				this.item.title = value
+				let _item = {
+					id: this.item.id,
+					title: this.item.title
+				}
+				setItem(_item, 'update')
+				this.$emit('change', false)
+			},
+			/* 取消 */
+			cancel() {
 				this.$emit('change', false)
 			}
 		}

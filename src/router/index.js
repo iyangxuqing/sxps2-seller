@@ -12,12 +12,13 @@ export default new Router({
 			redirect: '/goods'
     },
     {
+      name: 'goods',
 			path: '/goods',
 			component: Goods,
       children: [
       	{
-          path: ':id',
           name: 'item',
+          path: ':id',
           props: true,
       		component: Item
       	}

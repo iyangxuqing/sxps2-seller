@@ -19,7 +19,7 @@
 <script type="text/ecmascript-6">
 	// import BScroll from 'better-scroll'
 	import BScroll from '@/base/better-scroll/src/index'
-	import { getItems } from '@/api/items'
+	import { getItems, setItem } from '@/api/items'
 	import ItemEditor from './item-editor'
 
 	export default {
@@ -48,11 +48,14 @@
 		},
 		watch: {
 			'$route'(to, from) {
-				if(to.path == '/goods') {
-					for(let i in this.items) {
-						if(this.items[i].title===''){
-							this.items.splice(i, 1)
-						}
+				if (to.name == 'goods' && from.name == 'item') {
+					let id = from.params.id
+					let item = from.params.item
+					/* 新建商品时，如果商品标题为空，则舍弃该商品，当成未建新商品 */
+					if (item.title == '') {
+						this.items.pop()
+					} else {
+						setItem(item, 'set')
 					}
 				}
 			}

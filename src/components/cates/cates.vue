@@ -15,7 +15,6 @@
 			</div>
 		</div>
 		<CateEditor v-model="cateEditorShow" :cate="editCate" :cates="cates"></CateEditor>
-		<Alert v-model="alert"></Alert>
 	</div>
 </template>
 
@@ -57,7 +56,6 @@
 						}
 					}
 					this.$emit('change', activeCateId)
-					console.log('watch cates')
 				},
 				deep: true
 			}
@@ -95,23 +93,9 @@
 					pid: cate.pid,
 					title: cate.title
 				}
-				setCate(_cate, 'insert')
+				setCate(_cate, 'set')
 			},
 			cateTap(cate) {
-				this.alertShow = true
-				this.alert = {
-					title: '删除类目',
-					content: '确定要删除这个类目吗？',
-					showCancel: true,
-					confirm: function(res) {
-						console.log('abc', res)
-					},
-					cancel: function(res) {
-						console.log('abc', res)
-					}
-				}
-				return;
-
 				if (cate.pid==0) {
 					for(let i in this.cates) {
 						this.cates[i].active = false
@@ -132,18 +116,6 @@
 						}
 					}
 				}
-				// let selectedCate = null
-				// for(let i in this.cates){
-				// 	if(this.cates[i].active == true) {
-				// 		for(let j in this.cates[i].children){
-				// 			if(this.cates[i].children[j].active == true) {
-				// 				selectedCate = this.cates[i].children[j]
-				// 				break
-				// 			}
-				// 		}
-				// 		break
-				// 	}
-				// }
 			},
 			cateLongtap(cate) {
 				this.editCate = cate
@@ -161,6 +133,9 @@
 <style scoped lang="stylus" rel="stylesheet/stylus">
 	.cates
 		.cates-wrapper
+			display: flex
+			align-items: center
+			height: 45px
 			padding: 0 20px
 			border-bottom: 1px solid #ddd
 			.cate
@@ -168,7 +143,7 @@
 				display: flex
 				align-items: center
 				justify-content: center
-				height: 44px;
+				height: 100%
 				padding: 10px
 				cursor: pointer
 				&:first-child

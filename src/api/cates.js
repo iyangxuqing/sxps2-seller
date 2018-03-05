@@ -1,9 +1,11 @@
 import axios from 'axios'
 import config from './config.js'
 
+const apiUrl = config.apiHost + 'seller/_cate.php'
+
 export function getCates() {
 	return new Promise(function(resolve, reject) {
-		axios.get(config.apiHost + 'seller/cate2.php?m=get').then((res) => {
+		axios.get(apiUrl + '?m=get').then((res) => {
 			if(res.data.errno === 0) {
 				let cates = []
 				for(let i in res.data.cates) {
@@ -14,7 +16,6 @@ export function getCates() {
 					} else {
 						for(let j in cates) {
 							if(cates[j].id == cate.pid){
-								// if(!cates[j].children) cates[j].children = [];
 								cates[j].children.push(cate)
 								break
 							}
@@ -42,10 +43,31 @@ export function getCates() {
 }
 
 export function setCate(cate, method) {
-	let url = config.apiHost + 'seller/cate2.php?m=' + method
+	let url = apiUrl + '?m=' + method
 	return new Promise(function(resolve, reject) {
 		axios.post(url, cate).then((res) => {
-			console.log(res)
+			if (res.data.errno === 0) {
+				resolve(res.data)
+			} else {
+				reject(res)
+			}
+		}).catch((res) => {
+			reject(res)
+		})
+	})
+}
+
+export function delCate(cate) {
+	let url = apiUrl + '?m=delete'
+	return new Promise(function(resolve, reject) {
+		axios.post(url, cate).then((res) => {
+			if (res.data.errno === 0) {
+				resolve(res.data)
+			} else {
+				reject(res)
+			}
+		}).catch((res) => {
+			reject(res)
 		})
 	})
 }

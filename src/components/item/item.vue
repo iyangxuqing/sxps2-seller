@@ -3,7 +3,7 @@
 		<div class="page-item">
 			<div class="page-head">
 				<div class="page-head-left" @tap="back"><i class="icon-back"></i></div>
-				<div class="page-head-center"><span v-if="item">{{item.title || '新建商品'}}</span></div>
+				<div class="page-head-center"><span v-if="item">{{aitem.title || '新建商品'}}</span></div>
 				<div class="page-head-right"></div>
 			</div>
 			<div class="item" v-if="item">
@@ -23,12 +23,6 @@
 				<div class="item-specs-selector">
 					<div class="specs-label" :class="{'active': currentIndex==index}" v-for="(specs, index) in item.specs" :key="specs.id" @tap="specsTap(index)" @touchstart="specsPressDown(index)" @endstart="specsPressUp" @mousedown="specsPressDown(index)" @mouseup="specsPressUp">{{specs.title || '未命名'}}</div>
 					<div class="specs-label specs-label-new" @tap="specsAdd">+</div>
-				</div>
-			</div>
-			<div class="page-foot">
-				<div class="buttons">
-					<div class="button cancel" @tap="cancel">取 消</div>
-					<div class="button confirm" @tap="confirm">保 存</div>
 				</div>
 			</div>
 		</div>
@@ -59,7 +53,8 @@
 				editDescs: '',
 				editPrice: '',
 				editImage: '',
-				actionsheetShow: false
+				actionsheetShow: false,
+				aitem: this.item
 			}
 		},
 		created() {
@@ -68,27 +63,27 @@
 				return
 			}
 			this.currentIndex = -1
-			this.editTitle = this.item.title
-			this.editDescs = this.item.descs
-			this.editPrice = this.item.price
-			this.editImage = this.item.image
-			if(!this.item.specs){
-				Vue.set(this.item, 'specs', [])
+			this.editTitle = this.aitem.title
+			this.editDescs = this.aitem.descs
+			this.editPrice = this.aitem.price
+			this.editImage = this.aitem.image
+			if(!this.aitem.specs){
+				Vue.set(this.aitem, 'specs', [])
 			}
 		},
 		watch: {
 			currentIndex() {
 				let i = this.currentIndex
 				if(i < 0) {
-					this.editTitle = this.item.title
-					this.editDescs = this.item.descs
-					this.editPrice = this.item.price
-					this.editImage = this.item.image
+					this.editTitle = this.aitem.title
+					this.editDescs = this.aitem.descs
+					this.editPrice = this.aitem.price
+					this.editImage = this.aitem.image
 				} else {
-					this.editTitle = this.item.specs[i].title
-					this.editDescs = this.item.specs[i].descs
-					this.editPrice = this.item.specs[i].price
-					this.editImage = this.item.specs[i].image
+					this.editTitle = this.aitem.specs[i].title
+					this.editDescs = this.aitem.specs[i].descs
+					this.editPrice = this.aitem.specs[i].price
+					this.editImage = this.aitem.specs[i].image
 				}
 			}
 		},
@@ -101,9 +96,9 @@
 				let index = this.currentIndex
 				this.editTitle = value
 				if(index < 0) {
-					this.item.title = value
+					this.aitem.title = value
 				} else {
-					this.item.specs[index].title = value
+					this.aitem.specs[index].title = value
 				}
 			},
 			descsInput(e) {
@@ -111,9 +106,9 @@
 				let index = this.currentIndex
 				this.editDescs = value
 				if(index < 0) {
-					this.item.descs = value
+					this.aitem.descs = value
 				} else {
-					this.item.specs[index].descs = value
+					this.aitem.specs[index].descs = value
 				}
 			},
 			priceInput(e) {
@@ -121,17 +116,17 @@
 				let index = this.currentIndex
 				this.editPrice = value
 				if(index < 0) {
-					this.item.price = value
+					this.aitem.price = value
 				} else {
-					this.item.specs[index].price = value
+					this.aitem.specs[index].price = value
 				}
 			},
 			imageInput(image) {
 				let index = this.currentIndex
 				if(index < 0) {
-					this.item.image = image
+					this.aitem.image = image
 				} else {
-					this.item.specs[index].image = image
+					this.aitem.specs[index].image = image
 				}
 			},
 			specsTap(index) {
@@ -144,11 +139,11 @@
 				}, 20)
 			},
 			specsAdd() {
-				let specs = this.item.specs
+				let specs = this.aitem.specs
 				if(specs.length && specs[specs.length-1].title=='') return
 
-				this.item.specs.push({
-					id: Date.now(),
+				this.aitem.specs.push({
+					id: '' + Date.now(),
 					image: '',
 					title: '',
 					descs: '',
@@ -170,7 +165,7 @@
 			},
 			specsAction(item, index) {
 				let i = this.specsSelectedIndex
-				let specs = this.item.specs
+				let specs = this.aitem.specs
 				if(index == 0) { // 往前移
 					if(i > 0) {
 						let temp = specs[i]
@@ -187,20 +182,6 @@
 					specs.splice(i, 1)
 					this.currentIndex = -1
 				}
-			},
-			confirm() {
-				let item = this.item
-				let length = item.specs.length
-				if(item.specs[length-1].title=='未命名'){
-					item.specs.pop()
-					if(this.currentIndex == length-1){
-						this.currentIndex = 0
-					}
-				}
-				// setItem(this.item, 'update')
-			},
-			cancel() {
-				this.$router.back()
 			},
 			back() {
 				this.$router.back()

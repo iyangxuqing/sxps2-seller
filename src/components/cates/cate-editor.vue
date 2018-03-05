@@ -16,7 +16,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-	import { setCate } from '@/api/cates'
+	import { setCate, delCate } from '@/api/cates'
 	import Alert from '@/base/alert/alert'
 
 	export default {
@@ -166,12 +166,20 @@
 				}
 				/* 删除 */
 				else if (index == 2) {
+					let self = this
 					this.alert = {
 						content: '确定要删除该项类目吗？',
 						showCancel: true,
 						confirm: function(res) {
-							console.log(res)
-							this._delete(cate, this.cates)
+							delCate(cate).then((res) =>{
+								if (res.error) {
+									self.alert = {
+										content: res.error
+									}
+								} else {
+									self._delete(cate, self.cates)
+								}
+							})
 						}
 					}
 				}
@@ -190,11 +198,12 @@
 					return
 				}
 				this.cate.title = value
+				/* cate的辅助属性，如cate.active不应该转给数据库 */
 				let _cate = {
 					id: this.cate.id,
 					title: this.cate.title
 				}
-				setCate(_cate, 'update')
+				setCate(_cate, 'set')
 				this.$emit('change', false)
 			},
 			/* 取消 */
@@ -244,7 +253,7 @@
 					input
 						outline: none
 						padding: 10px
-						color: #f63
+						color: #393
 						text-align: center
 						letter-spacing: 2px
 				.actionsheet-item-separator

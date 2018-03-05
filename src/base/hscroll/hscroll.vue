@@ -73,8 +73,10 @@
 <style scoped lang="stylus" rel="stylesheet/stylus">
   .hscroll
     width: 100%
+    height: 100%
     overflow: hidden
     .hscroll-wrapper
       display: flex
       align-items: center
+      height: 100%
 </style>
