@@ -84,7 +84,7 @@ export function coreMixin(BScroll) {
           }
         }
       }
-    }, 750)
+    }, 500)
     /* add longtap event end */
 
   }

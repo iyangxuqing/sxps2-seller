@@ -48,13 +48,42 @@
 		},
 		methods: {
 			_sortUp(item, items) {
-				console.log('_sortup')
+				let index = -1
+				for(let i in items) {
+					if(items[i].id == item.id){
+						index = i
+						break
+					}
+				}
+				if(index > 0) {
+					let temp = items[index]
+					items[index] = items[index - 1]
+					items[index - 1] = temp
+				}
 			},
 			_sortDown(item, items) {
-				console.log('sortdown')
+				let index = -1
+				for(let i in items) {
+					if(items[i].id == item.id){
+						index = i
+						break
+					}
+				}
+				if(index < items.length - 1) {
+					let temp = items[index]
+					items[index] = items[Number(index) + 1]
+					items[Number(index) + 1] = temp
+				}
 			},
 			_delete(item, items) {
-				console.log('delete')
+				let index = -1
+				for(let i in items) {
+					if(items[i].id == item.id){
+						index = i
+						break
+					}
+				}
+				items.splice(index, 1)
 			},
 			action(item, index) {
 				/* 往前移 */

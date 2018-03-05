@@ -12,7 +12,7 @@
 			</div>
 		</div>
 		<router-view></router-view>
-		<ItemsEditor v-model="itemsEditorShow" :item="editItem" :items="items"></ItemsEditor>
+		<ItemEditor v-model="itemEditorShow" :item="editItem" :items="categoryItems"></ItemEditor>
 	</div>
  </template>
 
@@ -20,7 +20,7 @@
 	// import BScroll from 'better-scroll'
 	import BScroll from '@/base/better-scroll/src/index'
 	import { getItems } from '@/api/items'
-	import ItemsEditor from './items-editor'
+	import ItemEditor from './item-editor'
 
 	export default {
 		props: {
@@ -33,7 +33,7 @@
 	 		return {
 	 			items: [],
 	 			editItem: {},
-	 			itemsEditorShow: false,
+	 			itemEditorShow: false,
 	 			ready: false
 	 		}
  		},
@@ -93,9 +93,8 @@
 				})
 			},
 			itemLongTap(item) {
-				console.log('itemLongTap', item)
 				this.editItem = item
-				this.itemsEditorShow = true
+				this.itemEditorShow = true
 			}
 		},
 		computed: {
@@ -111,7 +110,7 @@
 			}
 		},
 		components: {
-			ItemsEditor
+			ItemEditor
 		}
 	}
 </script>

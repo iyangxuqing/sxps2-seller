@@ -3,7 +3,7 @@
 		<div class="actionsheet-mask" v-if="height"></div>
 		<div class="actionsheet-list">
 			<div class="actionsheet-item">
-				<div class="input"><input v-model="cate.title" @keyup.enter="inputEnter" @blur="inputBlur"></div>
+				<div class="input"><input :value="cate.title" placeholder="类目不可为空" ref="input" @keyup.enter="inputEnter" @blur="inputBlur"></div>
 			</div>
 			<div class="actionsheet-item" @click="action(cate, 0)">往前移</div>
 			<div class="actionsheet-item" @click="action(cate, 1)">往后移</div>
@@ -11,10 +11,13 @@
 			<div class="actionsheet-item actionsheet-item-separator"></div>
 			<div class="actionsheet-item actionsheet-item-cancel" @click="cancel">取消</div>
 		</div>
+		<alert v-model="alert"></alert>
 	</div>
 </template>
 
 <script type="text/ecmascript-6">
+	import { setCate } from '@/api/cates'
+	import Alert from '@/base/alert/alert'
 
 	export default {
  		model: {
@@ -39,6 +42,7 @@
 			return {
 				Show: false,
 				height: 0,
+				alert: {}
 			}
 		},
 		watch: {
@@ -142,7 +146,7 @@
 							let active = cates[i].children[index].active
 							cates[i].children.splice(index, 1)
 							if (active && cates[i].children.length) {
-								cates[i].children[0].active = true
+									cates[i].children[0].active = true
 							}
 							break
 						}
@@ -153,27 +157,53 @@
 				/* 往前移 */
 				if (index==0) {
 					this._sortUp(cate, this.cates)
+					setCate(cate, 'sortUp')
 				}
 				/* 往后移 */
 				else if (index == 1) {
 					this._sortDown(cate, this.cates)
+					setCate(cate, 'sortDown')
 				}
 				/* 删除 */
 				else if (index == 2) {
-					this._delete(cate, this.cates)
+					this.alert = {
+						content: '确定要删除该项类目吗？',
+						showCancel: true,
+						confirm: function(res) {
+							console.log(res)
+							this._delete(cate, this.cates)
+						}
+					}
 				}
 				this.$emit('action', cate, index)
 				this.$emit('change', false)
 			},
-			cancel() {
-				this.$emit('change', false)
-			},
+			/* 重命名 */
 			inputEnter(e) {
 				e.target.blur()
 			},
+			/* 重命名 */
 			inputBlur(e) {
+				let value = this.$refs.input.value
+				if(!value) {
+					e.target.focus()
+					return
+				}
+				this.cate.title = value
+				let _cate = {
+					id: this.cate.id,
+					title: this.cate.title
+				}
+				setCate(_cate, 'update')
+				this.$emit('change', false)
+			},
+			/* 取消 */
+			cancel() {
 				this.$emit('change', false)
 			}
+		},
+		components: {
+			Alert
 		}
 	}
 </script>
