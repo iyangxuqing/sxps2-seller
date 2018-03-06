@@ -1,9 +1,9 @@
 <template>
 	<transition name="slide">
-		<div class="page-item">
+		<div class="page">
 			<div class="page-head">
-				<div class="page-head-left" @tap="back"><i class="icon-back"></i></div>
-				<div class="page-head-center"><span v-if="item">{{aitem.title || '新建商品'}}</span></div>
+				<div class="page-head-left" @tap="back"><img src="@/common/image/enter.png"/></div>
+				<div class="page-head-center"><span v-if="item">{{item.title || '新建商品'}}</span></div>
 				<div class="page-head-right"></div>
 			</div>
 			<div class="item" v-if="item">
@@ -20,11 +20,13 @@
 						</div>
 					</div>
 				</div>
+				<div class="item-specs-header">商品规格</div>
 				<div class="item-specs-selector">
-					<div class="specs-label" :class="{'active': currentIndex==index}" v-for="(specs, index) in item.specs" :key="specs.id" @tap="specsTap(index)" @touchstart="specsPressDown(index)" @endstart="specsPressUp" @mousedown="specsPressDown(index)" @mouseup="specsPressUp">{{specs.title || '未命名'}}</div>
+					<div class="specs-label" :class="{'active': currentSpecsIndex==index}" v-for="(specs, index) in item.specs" :key="specs.id" @tap="specsTap(index)" @longtap="specsLongTap(index)">{{specs.title || '未命名'}}</div>
 					<div class="specs-label specs-label-new" @tap="specsAdd">+</div>
 				</div>
 			</div>
+			<specs-editor v-model="specsEditorShow" @action="specsAction"></specs-editor>
 		</div>
 	</transition>
 </template>
@@ -33,6 +35,7 @@
 	import Vue from 'vue'
 	import axios from 'axios'
 	import imageUploader from '@/base/imageUploader/imageUploader'
+	import SpecsEditor from './specs-editor'
 	import { setItem } from '@/api/items'
 
 	export default {
@@ -48,13 +51,13 @@
 		},
 		data() {
 			return {
-				currentIndex: 0,
 				editTitle: '',
 				editDescs: '',
 				editPrice: '',
 				editImage: '',
+				currentSpecsIndex: 0,
 				actionsheetShow: false,
-				aitem: this.item
+				specsEditorShow: false
 			}
 		},
 		created() {
@@ -62,28 +65,28 @@
 				this.$router.push('/goods')
 				return
 			}
-			this.currentIndex = -1
-			this.editTitle = this.aitem.title
-			this.editDescs = this.aitem.descs
-			this.editPrice = this.aitem.price
-			this.editImage = this.aitem.image
-			if(!this.aitem.specs){
-				Vue.set(this.aitem, 'specs', [])
+			this.currentSpecsIndex = -1
+			this.editTitle = this.item.title
+			this.editDescs = this.item.descs
+			this.editPrice = this.item.price
+			this.editImage = this.item.image
+			if(!this.item.specs){
+				Vue.set(this.item, 'specs', [])
 			}
 		},
 		watch: {
-			currentIndex() {
-				let i = this.currentIndex
+			currentSpecsIndex() {
+				let i = this.currentSpecsIndex
 				if(i < 0) {
-					this.editTitle = this.aitem.title
-					this.editDescs = this.aitem.descs
-					this.editPrice = this.aitem.price
-					this.editImage = this.aitem.image
+					this.editTitle = this.item.title
+					this.editDescs = this.item.descs
+					this.editPrice = this.item.price
+					this.editImage = this.item.image
 				} else {
-					this.editTitle = this.aitem.specs[i].title
-					this.editDescs = this.aitem.specs[i].descs
-					this.editPrice = this.aitem.specs[i].price
-					this.editImage = this.aitem.specs[i].image
+					this.editTitle = this.item.specs[i].title
+					this.editDescs = this.item.specs[i].descs
+					this.editPrice = this.item.specs[i].price
+					this.editImage = this.item.specs[i].image
 				}
 			}
 		},
@@ -93,79 +96,76 @@
 			},
 			titleInput(e) {
 				let value = e.target.value
-				let index = this.currentIndex
+				/* title字段不允许输入为空 */
+				if (!value) {
+					e.target.focus()
+					return
+				}
+				let index = this.currentSpecsIndex
 				this.editTitle = value
 				if(index < 0) {
-					this.aitem.title = value
+					this.item.title = value
 				} else {
-					this.aitem.specs[index].title = value
+					this.item.specs[index].title = value
 				}
 			},
 			descsInput(e) {
 				let value = e.target.value
-				let index = this.currentIndex
+				let index = this.currentSpecsIndex
 				this.editDescs = value
 				if(index < 0) {
-					this.aitem.descs = value
+					this.item.descs = value
 				} else {
-					this.aitem.specs[index].descs = value
+					this.item.specs[index].descs = value
 				}
 			},
 			priceInput(e) {
 				let value = e.target.value
-				let index = this.currentIndex
+				let index = this.currentSpecsIndex
 				this.editPrice = value
 				if(index < 0) {
-					this.aitem.price = value
+					this.item.price = value
 				} else {
-					this.aitem.specs[index].price = value
+					this.item.specs[index].price = value
 				}
 			},
 			imageInput(image) {
-				let index = this.currentIndex
+				let index = this.currentSpecsIndex
 				if(index < 0) {
-					this.aitem.image = image
+					this.item.image = image
 				} else {
-					this.aitem.specs[index].image = image
+					this.item.specs[index].image = image
 				}
 			},
 			specsTap(index) {
 				setTimeout(() => {
-					if(this.currentIndex == index) {
-						this.currentIndex = -1
+					if(this.currentSpecsIndex == index) {
+						this.currentSpecsIndex = -1
 					} else {
-						this.currentIndex = index
+						this.currentSpecsIndex = index
 					}
 				}, 20)
 			},
 			specsAdd() {
-				let specs = this.aitem.specs
+				let specs = this.item.specs
+				/* 当前还有一个空字段时，不允许再新增字段 */
 				if(specs.length && specs[specs.length-1].title=='') return
-
-				this.aitem.specs.push({
+				this.item.specs.push({
 					id: '' + Date.now(),
 					image: '',
 					title: '',
 					descs: '',
 					price: ''
 				})
-				this.currentIndex = specs.length - 1
-			},
-			specsPressDown(index) {
-				this.specsPressTimer = setTimeout(() => {
-					this.specsLongTap && this.specsLongTap(index)
-				}, 500)
-			},
-			specsPressUp() {
-				clearTimeout(this.specsPressTimer)
+				this.currentSpecsIndex = specs.length - 1
 			},
 			specsLongTap(index) {
-				this.specsSelectedIndex = index
-				this.actionsheetShow = !this.actionsheetShow
+				this.specsEditIndex = index
+				this.specsEditorShow = true
 			},
-			specsAction(item, index) {
-				let i = this.specsSelectedIndex
-				let specs = this.aitem.specs
+			specsAction(index) {
+				let i = this.specsEditIndex
+				let specs = this.item.specs
 				if(index == 0) { // 往前移
 					if(i > 0) {
 						let temp = specs[i]
@@ -175,12 +175,12 @@
 				} else if(index == 1) { // 往后移
 					if(i < specs.length - 1) {
 						let temp = specs[i]
-						specs[i] = specs[i + 1]
-						specs[i + 1] = temp
+						specs[i] = specs[Number(i) + 1]
+						specs[Number(i) + 1] = temp
 					}
 				} else if(index == 2) { // 删除
 					specs.splice(i, 1)
-					this.currentIndex = -1
+					this.currentSpecsIndex = -1
 				}
 			},
 			back() {
@@ -188,37 +188,47 @@
 			}
 		},
 		components: {
-			imageUploader
+			imageUploader,
+			SpecsEditor
 		}
 	}
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
-	.page-item
+
+	.slide-enter-active, .slide-leave-active
+		transition: all 0.3s
+	.slide-enter, .slide-leave-to
+		transform: translate3d(100%, 0, 0)
+
+	.page
 		position: fixed
-		z-index: 100
 		top: 0
 		left: 0
 		right: 0
 		bottom: 0
+		z-index: 100
 		background: #fff
 		.page-head
 			display: flex
 			align-items: center
-			height: 44px
+			height: 45px
 			font-size: 14px
-			border-bottom: 1px solid #ddd
+			box-sizing: border-box
+			border-bottom: 1px solid #eee
 			.page-head-left
+				flex-shrink: 0
 				display: flex
 				align-items: center
 				justify-content: center
-				width: 40px
+				width: 44px
 				height: 100%
 				cursor: pointer
-				.icon-back
-					padding: 10px
-					font-size: 14px
-					color: #666
+				padding: 12px
+				img
+					width: 100%
+					height: 100%
+					transform: rotate(180deg)
 			.page-head-center
 				flex-grow: 1
 				text-align: center
@@ -227,99 +237,19 @@
 				display: flex
 				align-items: center
 				justify-content: center
-				width: 40px
+				width: 44px
 				height: 100%
-		.page-foot
-			position: fixed
-			left: 0
-			bottom: 0
-			z-index: 20
-			width: 100%
-			height: 50px
-			background: #f2f2f2
-			border-top: 1px solid #eee
-			.buttons
-				display: flex
-				align-items: center
-				height: 50px
-				.button
-					flex-basis: 0
-					flex-grow: 1
-					display: flex
-					align-items: center
-					justify-content: center
-					height: 28px
-					color: #345
-					background: #fff
-					margin: 0 30px
-					border-radius: 5px
-					border: 1px solid #ccc
-					&.confirm
-						color: #fff
-						background: #f83
-		.page-popup
-			position: fixed
-			left: 0
-			right: 0
-			bottom: 0
-			z-index: 9999
-			height: 0
-			transition: all 300ms ease
-			&.show
-				height: 210px
-			.page-popup-mask
-				position: fixed
-				top: 0
-				left: 0
-				right: 0
-				bottom: 0
-				z-index: 1
-				background: rgba(0, 0, 0, 0.6)
-			.page-popup-content
-				position: absolute
-				z-index: 2
-				width: 100%
-				height: 100%
-				background-color: #fff
-				.button-list
-					width: 100%
-					.button-item
-						display: flex
-						align-items: center
-						justify-content: center
-						width: 100%
-						height: 50px
-						color: #345
-						letter-spacing: 2px
-						border-bottom: 1px solid #eee
-					.button-item-separator
-						height: 10px
-						background: #eee
-					.button-item-cancel
-						color: #f63
-
-	.slide-enter-active, .slide-leave-active
-		transition: all 0.3s
-	.slide-enter, .slide-leave-to
-		transform: translate3d(100%, 0, 0)
-
-	input
-		width: 100%
-		outline: none
-		box-sizing: border-box
-	.item-title
-		text-align: center
-		padding: 10px
 
 	.item
 		.item-edit
 			.item-edit-image
 				width: 100%
 				height: 280px
+				border-bottom: 1px solid #eee
 			.item-edit-text
 				position: relative
 				padding: 12px 10px 0
-				border-bottom: 1px solid #ddd
+				border-bottom: 1px solid #eee
 				.title
 					font-size: 16px
 				.descs
@@ -341,14 +271,18 @@
 						font-weight: 200
 						text-align: right
 						margin-right: 5px
+		.item-specs-header
+			display: flex
+			align-items: center
+			height: 45px
+			padding: 10px
+			background: #eee
 		.item-specs-selector
 			display: flex
 			flex-wrap: wrap
 			font-size: 12px
 			color: #345
-			min-height: 91px
-			padding: 10px 10px 0
-			border-bottom: 1px solid #ddd
+			padding: 10px
 			.specs-label
 				min-width: 54px
 				height: 30px

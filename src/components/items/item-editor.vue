@@ -2,12 +2,10 @@
 	<div class="actionsheet" :style="'height:'+height+'px'">
 		<div class="actionsheet-mask" v-if="height"></div>
 		<div class="actionsheet-list">
-			<div class="actionsheet-item">
-				<div class="input"><input :value="item.title" placeholder="名称不可为空" ref="input" @keyup.enter="inputEnter" @blur="inputBlur"></div>
-			</div>
 			<div class="actionsheet-item" @click="action(item, 0)">往前移</div>
 			<div class="actionsheet-item" @click="action(item, 1)">往后移</div>
-			<div class="actionsheet-item" @click="action(item, 2)">删除</div>
+			<div class="actionsheet-item" @click="action(item, 2)">上下架</div>
+			<div class="actionsheet-item" @click="action(item, 3)">删除</div>
 			<div class="actionsheet-item actionsheet-item-separator"></div>
 			<div class="actionsheet-item actionsheet-item-cancel" @click="cancel">取消</div>
 		</div>
@@ -77,6 +75,9 @@
 					items[Number(index) + 1] = temp
 				}
 			},
+			_onShelf(item, items) {
+				item.onShelf = item.onShelf == '1' ? '0' : '1'
+			},
 			_delete(item, items) {
 				let index = -1
 				for(let i in items) {
@@ -98,8 +99,13 @@
 					this._sortDown(item, this.items)
 					setItem(item, 'sortDown')
 				}
-				/* 删除 */
+				/* 上下架 */
 				else if (index == 2) {
+					this._onShelf(item, this.items)
+					setItem(item, 'set')
+				}
+				/* 删除 */
+				else if (index == 3) {
 					this._delete(item, this.items)
 					setItem(item, 'delete')
 				}

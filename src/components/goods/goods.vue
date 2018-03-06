@@ -33,7 +33,7 @@
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
 	.goods
-		height: 100vh
+		height: 100%
 		.cates-container
 			height: 90px
 		.items-container
