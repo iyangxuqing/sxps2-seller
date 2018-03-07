@@ -2,10 +2,10 @@
 	<div class="pages">
 		<div class="page goods">
 			<div class="cates-container">
-				<cates @change="cateChange"></cates>
+				<cates></cates>
 			</div>
 			<div class="items-container">
-				<items :cid="cid"></items>	
+				<items></items>	
 			</div>
 		</div>
 	</div>

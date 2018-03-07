@@ -22,7 +22,7 @@
 				</div>
 				<div class="item-specs-header">商品规格</div>
 				<div class="item-specs-selector">
-					<div class="specs-label" :class="{'active': currentSpecsIndex==index}" v-for="(specs, index) in item.specs" :key="specs.id" @tap="specsTap(index)" @longtap="specsLongTap(index)">{{specs.title || '未命名'}}</div>
+					<div class="specs-label" :class="{'active': currentSpecsIndex==index, 'offShelf': specs.onShelf=='0'}" v-for="(specs, index) in item.specs" :key="specs.id" @tap="specsTap(index)" @longtap="specsLongTap(index)">{{specs.title || '未命名'}}</div>
 					<div class="specs-label specs-label-new" @tap="specsAdd">+</div>
 				</div>
 			</div>
@@ -161,7 +161,8 @@
 					image: '',
 					title: '',
 					descs: '',
-					price: ''
+					price: '',
+					onShelf: '1'
 				})
 				this.currentSpecsIndex = specs.length - 1
 			},
@@ -172,15 +173,15 @@
 					data: specs,
 					dataIndex: index,
 					items: [{
-						value: title,
-						placeholder: '类目名不可为空',
-						action: (value) => {
-							specs[index].title = value
+						title: '往前移'
+					},{
+						title: '往后移'
+					},{
+						title: '上下架',
+						action: () => {
+							let onShelf = specs[index].onShelf == '1' ? '0' : '1'
+							specs[index].onShelf = onShelf
 						}
-					},{
-						title: '往前移',
-					},{
-						title: '往后移', 
 					},{
 						title: '删除',
 						action: () => {
@@ -291,6 +292,7 @@
 			color: #345
 			padding: 10px
 			.specs-label
+				position: relative
 				min-width: 54px
 				height: 30px
 				display: flex
@@ -307,4 +309,13 @@
 				&.active
 					color: #f63
 					border: 1px solid #f63
+				&.offShelf::after
+					content: ''
+					position: absolute
+					top: 13px
+					left: 15%
+					width: 70%
+					height: 1px
+					background: red
+
 </style>

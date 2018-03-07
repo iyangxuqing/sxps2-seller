@@ -3,7 +3,7 @@
 		<div class="actionsheet-list" :style="'height:'+height+'px'">
 			<div class="actionsheet-item" v-for="(item, index) in items">
 				<div class="actionsheet-item-title" v-if="item.title" @touchstart="touchstart(index)" @mousedown="mousedown(index)">{{item.title}}</div>
-				<div class="actionsheet-item-input" v-if="item.value"><input v-model="item.value" :placeholder="item.placeholder" @keyup.enter="inputEnter(index, $event)"/></div>
+				<div class="actionsheet-item-input" v-if="item.value"><input :value="item.value" :placeholder="item.placeholder" @keyup.enter="inputEnter(index, $event)"/></div>
 			</div>
 			<div class="actionsheet-item actionsheet-item-separator"></div>
 			<div class="actionsheet-item actionsheet-item-cancel" @touchstart="cancel" @mousedown="cancel">取消</div>
@@ -50,9 +50,9 @@
 				this.action(index)
 			},
 			inputEnter(index, e) {
-				if(this.items[index].value) {
+				if (e.target.value) {
 					e.target.blur()
-					this.action(index, this.items[index].value)
+					this.action(index, e.target.value)
 				}
 			},
 			action(index, value) {

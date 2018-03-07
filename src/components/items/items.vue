@@ -20,21 +20,19 @@
 	import { getItems, setItem } from '@/api/items'
 
 	export default {
-		props: {
-			cid: {
-				type: String,
-				default: ''
-			}
-		},
 	 	data() {
 	 		return {
-	 			items: [],
+	 			cid: '',
+	 			items: []
 	 		}
  		},
 		created() {
 			getItems().then((items) => {
 				this.items = items
 				this._initScroll()
+			})
+			Bus.$on('activeCateId', (cid) => {
+				this.cid = cid
 			})
 		},
 		watch: {

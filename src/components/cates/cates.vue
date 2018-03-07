@@ -19,9 +19,10 @@
 
 <script type="text/ecmascript-6">
 
+	import Vue from 'vue'
 	import Bus from '@/common/js/bus'
 	import HScroll from '@/base/hscroll/hscroll'
-	import { getCates, setCate } from '@/api/cates'
+	import { getCates, setCate, delCate } from '@/api/cates'
 
 	export default {
 		data() {
@@ -39,19 +40,8 @@
 		watch: {
 			cates: {
 				handler: function(val, oldVal) {
-					let activeCateId = ''
-					for(let i in this.cates) {
-						if(this.cates[i].active == true) {
-							for(let j in this.cates[i].children) {
-								if(this.cates[i].children[j].active == true) {
-									activeCateId = this.cates[i].children[j].id
-									break
-								}
-							}
-							break
-						}
-					}
-					this.$emit('change', activeCateId)
+					let activeCId = this._getCateActive()
+					Bus.$emit('activeCateId', activeCId)
 				},
 				deep: true
 			}
@@ -61,7 +51,8 @@
 				e.target.blur()
 			},
 			cateAdd({pid}) {
-				if(!this.cate1Title && !this.cate2Title) return /* input 输入空时，不反应 */
+				/* input 输入空时，不反应 */
+				if(!this.cate1Title && !this.cate2Title) return
 
 				let cate = {
 					id: String(Date.now()),
@@ -84,32 +75,21 @@
 					}
 				}
 				
-				let _cate = {
+				setCate({
 					id: cate.id,
 					pid: cate.pid,
 					title: cate.title
-				}
-				setCate(_cate, 'set')
+				}, 'set')
 			},
 			cateTap(cate) {
-				if (cate.pid==0) {
-					for(let i in this.cates) {
-						this.cates[i].active = false
-						if(this.cates[i].id == cate.id) {
-							this.cates[i].active = true
-						}
+				let {i, j} = this._getCateIndex(cate)
+				if (typeof j == 'undefined') {
+					for (let k in this.cates) {
+						this.cates[k].active = k == i
 					}
 				} else {
-					for(let i in this.cates) {
-						if(this.cates[i].id == cate.pid) {
-							for(let j in this.cates[i].children) {
-								this.cates[i].children[j].active = false
-								if (this.cates[i].children[j].id == cate.id) {
-									this.cates[i].children[j].active = true
-								}
-							}
-							break
-						}
+					for (let k in this.cates[i].children) {
+						this.cates[i].children[k].active = k == j
 					}
 				}
 			},
@@ -117,26 +97,132 @@
 				Bus.$emit('actionsheet', {
 					items: [{
 						value: cate.title,
+						placeholder: '类目名不可为空',
 						action: (value) => {
-							console.log(value)
+							cate.title = value
+							setCate({
+								id: cate.id,
+								pid: cate.pid,
+								title: cate.title
+							}, 'set')
 						}
 					},{
 						title: '往前移',
 						action: () => {
-							console.log('sortUp')
+							let cates = this.cates
+							let {i, j} = this._getCateIndex(cate)
+							if (typeof j == 'undefined') {
+								if (i > 0) {
+									let temp = cates[i]
+									Vue.set(cates, i, cates[i - 1])
+									Vue.set(cates, i - 1, temp)
+								}
+							} else {
+								if (j > 0) {
+									let temp = cates[i].children[j]
+									Vue.set(cates[i].children, j, cates[i].children[j - 1])
+									Vue.set(cates[i].children, j - 1, temp)
+								}
+							}
+							setCate({
+								id: cate.id,
+								pid: cate.pid,
+								sort: cate.sort
+							}, 'sortUp')
 						}
 					},{
 						title: '往后移',
 						action: () => {
-							console.log('sortDown')
+							let cates = this.cates
+							let {i, j} = this._getCateIndex(cate)
+							if (typeof j == 'undefined') {
+								if (i < cates.length - 1) {
+									let temp = cates[i]
+									Vue.set(cates, i, cates[Number(i) + 1])
+									Vue.set(cates, Number(i) + 1, temp)
+								}
+							} else {
+								if (j < cates[i].children.length - 1) {
+									let temp = cates[i].children[j]
+									Vue.set(cates[i].children, j, cates[i].children[Number(j) + 1])
+									Vue.set(cates[i].children, Number(j) + 1, temp)
+								}
+							}
+							setCate({
+								id: cate.id,
+								pid: cate.pid,
+								sort: cate.sort
+							}, 'sortDown')
 						}
 					},{
 						title: '删除',
 						action: () => {
-							console.log('delete')
+							delCate({
+								id: cate.id,
+								pid: cate.pid
+							}).then((res) => {
+								if (res.error) {
+									Bus.$emit('alert', {
+										title: '删除错误',
+										content: res.error
+									})
+								} else {
+									let cates = this.cates
+									let {i, j} = this._getCateIndex(cate)
+									if (typeof j == 'undefined') {
+										let active = cates[i].active
+										cates.splice(i, 1)
+										if (active && cates.length > 0) {
+											cates[0].active = true
+										}
+									} else {
+										let active = cates[i].children[j].active
+										cates[i].children.splice(j, 1)
+										if (active && cates[i].children.length > 0) {
+											cates[i].children[0].active = true
+										}
+									}
+								}
+							})
 						}
 					}]
 				})
+			},
+			_getCateIndex(cate) {
+				let cates = this.cates
+				if (cate.pid == 0) {
+					for (let i in cates) {
+						if (cates[i].id == cate.id) {
+							return {i}
+						}
+					}
+				} else {
+					for (let i in cates) {
+						if (cates[i].id == cate.pid) {
+							for (let j in cates[i].children) {
+								if (cates[i].children[j].id == cate.id) {
+									return {i, j}
+								}
+							}
+						}
+					}
+				}
+			},
+			_getCateActive() {
+				let activeCId = ''
+				let cates = this.cates
+				for (let i in cates) {
+					if (cates[i].active == true) {
+						for (let j in cates[i].children) {
+							if (cates[i].children[j].active == true) {
+								activeCId = cates[i].children[j].id
+								break
+							}
+						}
+						break
+					}
+				}
+				return activeCId
 			}
 		},
 		components: {
