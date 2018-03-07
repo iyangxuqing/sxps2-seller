@@ -14,15 +14,13 @@ export default new Router({
     {
       name: 'goods',
 			path: '/goods',
-			component: Goods,
-      children: [
-      	{
-          name: 'item',
-          path: ':id',
-          props: true,
-      		component: Item
-      	}
-      ]
+			component: Goods
+    },
+    {
+      name: 'item',
+      path: '/goods/:id',
+      props: true,
+      component: Item
     }
   ]
 })

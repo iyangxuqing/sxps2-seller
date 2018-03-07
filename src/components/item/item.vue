@@ -1,6 +1,6 @@
 <template>
 	<transition name="slide">
-		<div class="page">
+		<div class="page" ref="page">
 			<div class="page-head">
 				<div class="page-head-left" @tap="back"><img src="@/common/image/enter.png"/></div>
 				<div class="page-head-center"><span v-if="item">{{item.title || '新建商品'}}</span></div>
@@ -26,7 +26,6 @@
 					<div class="specs-label specs-label-new" @tap="specsAdd">+</div>
 				</div>
 			</div>
-			<specs-editor v-model="specsEditorShow" @action="specsAction"></specs-editor>
 		</div>
 	</transition>
 </template>
@@ -34,8 +33,9 @@
 <script type="text/ecmascript-6">
 	import Vue from 'vue'
 	import axios from 'axios'
+	import Bus from '@/common/js/bus'
+	import BScroll from '@/base/better-scroll/src/index'
 	import imageUploader from '@/base/imageUploader/imageUploader'
-	import SpecsEditor from './specs-editor'
 	import { setItem } from '@/api/items'
 
 	export default {
@@ -70,9 +70,15 @@
 			this.editDescs = this.item.descs
 			this.editPrice = this.item.price
 			this.editImage = this.item.image
-			if(!this.item.specs){
-				Vue.set(this.item, 'specs', [])
-			}
+		},
+		mounted() {
+			setTimeout(() => {
+				this.scroll = new BScroll(this.$refs.page, {
+					tap: true,
+					longtap: true,
+					click: true
+				})
+			}, 20)
 		},
 		watch: {
 			currentSpecsIndex() {
@@ -150,7 +156,7 @@
 				let specs = this.item.specs
 				/* 当前还有一个空字段时，不允许再新增字段 */
 				if(specs.length && specs[specs.length-1].title=='') return
-				this.item.specs.push({
+				specs.push({
 					id: '' + Date.now(),
 					image: '',
 					title: '',
@@ -160,36 +166,37 @@
 				this.currentSpecsIndex = specs.length - 1
 			},
 			specsLongTap(index) {
-				this.specsEditIndex = index
-				this.specsEditorShow = true
-			},
-			specsAction(index) {
-				let i = this.specsEditIndex
 				let specs = this.item.specs
-				if(index == 0) { // 往前移
-					if(i > 0) {
-						let temp = specs[i]
-						specs[i] = specs[i - 1]
-						specs[i - 1] = temp
-					}
-				} else if(index == 1) { // 往后移
-					if(i < specs.length - 1) {
-						let temp = specs[i]
-						specs[i] = specs[Number(i) + 1]
-						specs[Number(i) + 1] = temp
-					}
-				} else if(index == 2) { // 删除
-					specs.splice(i, 1)
-					this.currentSpecsIndex = -1
-				}
+				let title = specs[index].title || '未命名'
+				Bus.$emit('actionsheet', {
+					data: specs,
+					dataIndex: index,
+					items: [{
+						value: title,
+						placeholder: '类目名不可为空',
+						action: (value) => {
+							specs[index].title = value
+						}
+					},{
+						title: '往前移',
+					},{
+						title: '往后移', 
+					},{
+						title: '删除',
+						action: () => {
+							if(this.currentSpecsIndex == index) {
+								this.currentSpecsIndex = -1
+							}
+						}
+					}]
+				})
 			},
 			back() {
 				this.$router.back()
 			}
 		},
 		components: {
-			imageUploader,
-			SpecsEditor
+			imageUploader
 		}
 	}
 </script>
@@ -202,7 +209,7 @@
 		transform: translate3d(100%, 0, 0)
 
 	.page
-		position: fixed
+		position: absolute
 		top: 0
 		left: 0
 		right: 0

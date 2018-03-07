@@ -1,11 +1,10 @@
 <template>
-	<div class="alert" v-if="alert.content">
-		<div class="alert-mask"></div>
+	<div class="alert" :class="{'show': show}">
 		<div class="alert-wrapper">
-			<div class="alert-title" v-if="alert.title">{{alert.title}}</div>
-			<div class="alert-content" v-if="alert.content">{{alert.content}}</div>
+			<div class="alert-title" v-if="title">{{title}}</div>
+			<div class="alert-content" v-if="content">{{content}}</div>
 			<div class="alert-buttons">
-				<div class="alert-button alert-button-cancel" v-if="alert.showCancel" @click="cancel">取消</div>
+				<div class="alert-button alert-button-cancel" v-if="showCancel" @click="cancel">取消</div>
 				<div class="alert-button alert-button-confirm" @click="confirm">确定</div>
 			</div>
 		</div>
@@ -14,29 +13,34 @@
 
 <script type="text/ecmascript-6">
 
+	import Bus from '@/common/js/bus'
+
 	export default {
-		model: {
-			prop: 'alert',
-			event: 'change'
-		},
-		props: {
-			alert: {
-				type: Object,
-				default: () => {}
+		data() {
+			return {
+				title: '',
+				content: '',
+				show: false,
+				showCancel: false,
 			}
+		},
+		created() {
+			Bus.$on('alert', (options) => {
+				this.show = true
+				this.title = options.title
+				this.content = options.content
+				this.showCancel = options.showCancel
+				this.options = options
+			})
 		},
 		methods: {
 			cancel() {
-				this.Show = false
-				this.$emit('change', {})
-				this.$emit('confirm', {confirm: false})
-				this.alert.cancel && this.alert.cancel({confirm: false, cancel: true})
+				this.show = false
+				this.options.cancel && this.options.cancel()
 			},
 			confirm() {
-				this.Show = false
-				this.$emit('change', {})
-				this.$emit('confirm', {confirm: true})
-				this.alert.confirm && this.alert.confirm({confirm: true, cancel: false})
+				this.show = false
+				this.options.confirm && this.options.confirm()
 			}
 		}
 	}
@@ -44,19 +48,20 @@
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
 	.alert
-		.alert-mask
-			position: fixed
-			top: 0
-			left: 0
-			right: 0
-			bottom: 0
-			z-index: 1000
-			background: rgba(0, 0, 0, 0.5)
+		position: absolute
+		top: 0
+		left: 0
+		right: 0
+		bottom: 0
+		z-index: 1000
+		display: none
+		&.show
+			display: block
+		background: rgba(0, 0, 0, 0.5)
 		.alert-wrapper
-			position: fixed
+			position: absolute
 			top: 45%
 			left: 50%
-			z-index: 1001
 			transform: translate(-50%, -50%)
 			width: 280px
 			height: 180px
@@ -75,6 +80,8 @@
 			flex-grow: 1
 			padding: 20px
 			letter-spacing: 1px
+			line-height: 1.4
+			text-indent: 2em
 		.alert-title + .alert-content
 			padding-top: 2px
 		.alert-buttons
@@ -90,6 +97,7 @@
 				align-items: center
 				justify-content: center
 				letter-spacing: 2px
+				cursor: pointer
 				&.alert-button-confirm
 					color: #f63
 				&.alert-button-cancel

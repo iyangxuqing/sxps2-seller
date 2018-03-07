@@ -12,6 +12,7 @@ export function getItems() {
         	items[i].cid = Number(items[i].cid)
         	items[i].image = items[i].image || items[i].images[0]
           items[i].price = Number(items[i].price).toFixed(2)
+          if(!items[i].specs) items[i].specs = []
         }
 				resolve(items)
 			}
@@ -26,6 +27,7 @@ export function setItem(cate, method) {
 			if (res.data.errno === 0) {
 				resolve(res.data)
 			} else {
+				console.error('res.data')
 				reject(res)
 			}
 		}).catch((res) => {

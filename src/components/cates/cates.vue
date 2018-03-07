@@ -14,15 +14,14 @@
 				</HScroll>
 			</div>
 		</div>
-		<CateEditor v-model="cateEditorShow" :cate="editCate" :cates="cates"></CateEditor>
 	</div>
 </template>
 
 <script type="text/ecmascript-6">
-	import {getCates, setCate} from '@/api/cates'
+
+	import Bus from '@/common/js/bus'
 	import HScroll from '@/base/hscroll/hscroll'
-	import CateEditor from './cate-editor'
-	import Alert from '@/base/alert/alert'
+	import { getCates, setCate } from '@/api/cates'
 
 	export default {
 		data() {
@@ -30,9 +29,6 @@
 				cates: [],
 				cate1Title: '',
 				cate2Title: '',
-				editCate: {},
-				cateEditorShow: false,
-				alert: {}
 			}
 		},
 		created() {
@@ -118,14 +114,33 @@
 				}
 			},
 			cateLongtap(cate) {
-				this.editCate = cate
-				this.cateEditorShow = true
+				Bus.$emit('actionsheet', {
+					items: [{
+						value: cate.title,
+						action: (value) => {
+							console.log(value)
+						}
+					},{
+						title: '往前移',
+						action: () => {
+							console.log('sortUp')
+						}
+					},{
+						title: '往后移',
+						action: () => {
+							console.log('sortDown')
+						}
+					},{
+						title: '删除',
+						action: () => {
+							console.log('delete')
+						}
+					}]
+				})
 			}
 		},
 		components: {
-			HScroll,
-			CateEditor,
-			Alert
+			HScroll
 		}
 	}
 </script>

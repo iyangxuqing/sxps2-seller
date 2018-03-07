@@ -10,15 +10,14 @@
 			</div>
 		</div>
 		<router-view></router-view>
-		<ItemEditor v-model="itemEditorShow" :item="editItem" :items="categoryItems"></ItemEditor>
 	</div>
  </template>
 
 <script type="text/ecmascript-6">
-	// import BScroll from 'better-scroll'
+
+	import Bus from '@/common/js/bus'
 	import BScroll from '@/base/better-scroll/src/index'
 	import { getItems, setItem } from '@/api/items'
-	import ItemEditor from './item-editor'
 
 	export default {
 		props: {
@@ -30,8 +29,6 @@
 	 	data() {
 	 		return {
 	 			items: [],
-	 			editItem: {},
-	 			itemEditorShow: false
 	 		}
  		},
 		created() {
@@ -96,8 +93,29 @@
 				})
 			},
 			itemLongTap(item) {
-				this.editItem = item
-				this.itemEditorShow = true
+				let index = -1
+				for (let i in this.items) {
+					if (this.items[i].id == item.id) {
+						index = i
+						break
+					}
+				}
+				Bus.$emit('actionsheet', {
+					data: this.items,
+					dataIndex: index,
+					items: [{
+						title: '往前移'
+					},{
+						title: '往后移'
+					},{
+						title: '上下架',
+						action: () => {
+							item.onShelf = item.onShelf == '1' ? '0' : '1'
+						}
+					},{
+						title: '删除'
+					}]
+				})
 			}
 		},
 		computed: {
@@ -111,9 +129,6 @@
 				this.scroll && this.scroll.scrollTo(0, 0)
 				return _items
 			}
-		},
-		components: {
-			ItemEditor
 		}
 	}
 </script>
@@ -128,8 +143,8 @@
 			flex-wrap: wrap
 			padding: 20px
 			.item
-				$w = calc((100vw - 80px)/3)
-				width: $w
+				$width = calc((100vw - 80px)/3)
+				width: $width
 				margin-bottom: 10px
 				cursor: pointer
 				position: relative
@@ -138,7 +153,7 @@
 					margin-right: 20px
 				.item-image
 					width: 100%
-					height: $w
+					height: $width
 					img
 						width: 100%
 						height: 100%
@@ -146,6 +161,7 @@
 					height: 36px
 					line-height: 30px
 					text-align: center
+					font-size: 13px
 				&.offshelf::after
 					content: ''
 					position: absolute

@@ -1,10 +1,18 @@
 <template>
   <div id="app" :class="{'pc': isPc()}">
-    <router-view/>
+ 		<keep-alive>
+    	<router-view></router-view>
+ 		</keep-alive>
+ 		<Alert></Alert>
+    <ActionSheet></ActionSheet>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+
+import Alert from '@/components/alert/alert'
+import ActionSheet from '@/components/actionsheet/actionsheet'
+
 export default {
   name: 'App',
   methods: {
@@ -20,12 +28,17 @@ export default {
 	  	}
   		return flag
 		}
+  },
+  components: {
+  	Alert,
+  	ActionSheet
   }
 }
 </script>
 
-<style scoped lang="stylus" rel="stylesheet/stylus">
+<style lang="stylus" rel="stylesheet/stylus">
 	#app
+		position: relative
 		width: 100%
 		height: 100%
 		overflow: hidden
@@ -35,5 +48,13 @@ export default {
 			margin: 40px auto
 			font-size: 14px
 			border: 1px solid #ccc
-			box-shadow: 0px 0px 10px 3px #ccc
+			box-shadow: 0px 0px 10px 2px #ccc
+		.pages
+			position: relative
+			width: 100%
+			height: 100%
+			.page
+				width: 100%
+				heihgt: 100%
+				background: #fff
 </style>
