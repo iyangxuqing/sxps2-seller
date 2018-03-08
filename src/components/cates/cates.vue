@@ -4,13 +4,13 @@
 			<div class="cates-wrapper" v-if="cates.length">
 				<HScroll :data="cates">
 					<div class="cate" v-for="cate in cates" :class="{active: cate.active}" @tap="cateTap(cate)" @longtap="cateLongtap(cate)">{{cate.title}}</div>
-					<input class="cate-input" v-model="cate1Title" placeholder="新增" @keyup.enter="inputEnter" @blur="cateAdd({pid: 0})">
+					<input class="cate-input" v-model="cate1Title" placeholder="新增" maxlength="6" @keyup.enter="inputEnter" @blur="cateAdd({pid: 0})">
 				</HScroll>
 			</div>
 			<div class="cates-wrapper" v-for="cate in cates" v-if="cate.active">
 				<HScroll :data="cate.children">
 					<div class="cate" v-for="child in cate.children" :class="{active: child.active}" @tap="cateTap(child)" @longtap="cateLongtap(child)">{{child.title}}</div>
-					<input class="cate-input" v-model="cate2Title" placeholder="新增" @keyup.enter="inputEnter" @blur="cateAdd({pid: cate.id})">
+					<input class="cate-input" v-model="cate2Title" placeholder="新增" maxlength="6" @keyup.enter="inputEnter" @blur="cateAdd({pid: cate.id})">
 				</HScroll>
 			</div>
 		</div>

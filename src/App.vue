@@ -43,9 +43,10 @@ export default {
 		height: 100%
 		overflow: hidden
 		&.pc
+			top: 40px
 			width: 375px
 			height: 667px
-			margin: 40px auto
+			margin: 0 auto
 			font-size: 14px
 			border: 1px solid #ccc
 			box-shadow: 0px 0px 10px 2px #ccc

@@ -12,11 +12,10 @@
 						<imageUploader v-model="editor.image" @change="imageInput"></imageUploader>
 					</div>
 					<div class="item-edit-text">
-						<input class="title" :value="editor.title" placeholder="输入名称" @blur="titleInput" @keyup.enter="inputEnter">
-						<input class="descs" :value="editor.descs" placeholder="输入附注说明" @blur="descsInput" @keyup.enter="inputEnter">
+						<input class="title" :value="editor.title" placeholder="输入名称" maxlength="8" @blur="titleInput" @keyup.enter="inputEnter">
+						<input class="descs" :value="editor.descs" placeholder="输入附注说明" maxlength="26" @blur="descsInput" @keyup.enter="inputEnter">
 						<div class="price">
-							<input :value="editor.price" placeHolder="0.00" @blur="priceInput" @keyup.enter="inputEnter">	
-							<div class="yuan">元</div>
+							<input :value="editor.price" placeHolder="0.00" maxlength="7" v-number @blur="priceInput" @keyup.enter="inputEnter"><div class="yuan">元</div>
 						</div>
 					</div>
 				</div>
@@ -88,6 +87,11 @@
 			}
 		},
 		methods: {
+			keydown(e) {
+				let value = e.target.value
+				value = value.replace(/[^\d^\.]+/g,'')
+				this.editor.price = value
+			},
 			inputEnter(e) {
 				e.target.blur()
 			},
@@ -138,25 +142,26 @@
 				this.currentSpecsIndex = specs.length - 1
 			},
 			specsLongTap(index) {
-				/* 主商品不可以被编辑 */
-				if (index == 0) return
-
 				let specs = this.item.specs
 				Bus.$emit('actionsheet', {
 					data: specs,
 					dataIndex: index,
 					items: [{
-						title: '往前移'
+						title: '往前移',
+						disable: index==0 || index==1
 					},{
-						title: '往后移'
+						title: '往后移',
+						disable: index==0
 					},{
 						title: '上下架',
+						disable: index==0,
 						action: () => {
 							let onShelf = specs[index].onShelf == '1' ? '0' : '1'
 							specs[index].onShelf = onShelf
 						}
 					},{
 						title: '删除',
+						disable: index==0,
 						action: () => {
 							if(this.currentSpecsIndex == index) {
 								this.currentSpecsIndex = 0
@@ -234,12 +239,12 @@
 				.title
 					font-size: 16px
 				.descs
-					font-size: 12px
+					font-size: 13px
 					color: #888
 					padding: 12px 0
 				.price
 					position: absolute
-					top: 50%
+					top: 35%
 					right: 10px
 					transform: translateY(-50%)
 					display: flex

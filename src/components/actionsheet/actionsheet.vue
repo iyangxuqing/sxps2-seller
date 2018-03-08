@@ -1,7 +1,7 @@
 <template>
 	<div class="actionsheet" :class="{'show': show}">
 		<div class="actionsheet-list" :style="'height:'+height+'px'">
-			<div class="actionsheet-item" v-for="(item, index) in items">
+			<div class="actionsheet-item" :class="{'disable': item.disable}" v-for="(item, index) in items">
 				<div class="actionsheet-item-title" v-if="item.title" @touchstart="touchstart(index)" @mousedown="mousedown(index)">{{item.title}}</div>
 				<div class="actionsheet-item-input" v-if="item.value"><input :value="item.value" :placeholder="item.placeholder" @keyup.enter="inputEnter(index, $event)"/></div>
 			</div>
@@ -57,6 +57,7 @@
 			},
 			action(index, value) {
 				let item = this.items[index]
+				if (item.disable) return
 				let data = this.data
 				let dataIndex = this.dataIndex
 				if (this.baseAction && item.title == '往前移') {
@@ -137,6 +138,8 @@
 					cursor: pointer
 					letter-spacing: 2px
 					border-bottom: 1px solid #eee
+					&.disable
+						color: #aaa
 					.actionsheet-item-title
 						display: flex
 						align-items: center
