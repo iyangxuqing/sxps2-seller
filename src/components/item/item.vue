@@ -1,9 +1,9 @@
 <template>
 	<transition name="slide">
-		<div class="page" ref="page">
+		<div class="page">
 			<div class="page-head">
 				<div class="page-head-left" @tap="back"><img src="@/common/image/enter.png"/></div>
-				<div class="page-head-center"><span v-if="item">{{item.title || '新建商品'}}</span></div>
+				<div class="page-head-center"><span v-if="item">{{item.specs[0].title || '新建商品'}}</span></div>
 				<div class="page-head-right"></div>
 			</div>
 			<div class="item" v-if="item">
@@ -50,49 +50,40 @@
 		},
 		data() {
 			return {
-				currentSpecsIndex: -1,
+				currentSpecsIndex: 0,
 				editor: {}
 			}
 		},
 		created() {
+			setTimeout(() => {
+				this.scroll = new BScroll('.page', {
+					tap: true,
+					click: true,
+					longtap: true
+				})
+			}, 20)
 		},
 		activated() {
 			if (!this.item) {
 				this.$router.push('/goods')
 				return
 			}
-			setTimeout(() => {
-				this.scroll = new BScroll(this.$refs.page, {
-					tap: true,
-					click: true,
-					longtap: true
-				})
-			}, 20)
-			this.currentSpecsIndex = -1
+			this.currentSpecsIndex = 0
 			this.editor = {
-				title: this.item.title,
-				descs: this.item.descs,
-				price: this.item.price,
-				image: this.item.image
+				title: this.item.specs[0].title,
+				descs: this.item.specs[0].descs,
+				price: this.item.specs[0].price,
+				image: this.item.specs[0].image
 			}			
 		},
 		watch: {
 			currentSpecsIndex() {
 				let i = this.currentSpecsIndex
-				if(i < 0) {
-					this.editor = {
-						title: this.item.title,
-						descs: this.item.descs,
-						price: this.item.price,
-						image: this.item.image
-					}
-				} else {
-					this.editor = {
-						title: this.item.specs[i].title,
-						descs: this.item.specs[i].descs,
-						price: this.item.specs[i].price,
-						image: this.item.specs[i].image
-					}
+				this.editor = {
+					title: this.item.specs[i].title,
+					descs: this.item.specs[i].descs,
+					price: this.item.specs[i].price,
+					image: this.item.specs[i].image
 				}
 			}
 		},
@@ -107,55 +98,35 @@
 					e.target.focus()
 					return
 				}
+				this.editor.title = value
 				let index = this.currentSpecsIndex
-				this.editTitle = value
-				if(index < 0) {
-					this.item.title = value
-				} else {
-					this.item.specs[index].title = value
-				}
+				this.item.specs[index].title = value
 			},
 			descsInput(e) {
 				let value = e.target.value
 				let index = this.currentSpecsIndex
-				this.editDescs = value
-				if(index < 0) {
-					this.item.descs = value
-				} else {
-					this.item.specs[index].descs = value
-				}
+				this.editor.descs = value
+				this.item.specs[index].descs = value
 			},
 			priceInput(e) {
 				let value = e.target.value
 				let index = this.currentSpecsIndex
-				this.editPrice = value
-				if(index < 0) {
-					this.item.price = value
-				} else {
-					this.item.specs[index].price = value
-				}
+				this.editor.price = value
+				this.item.specs[index].price = value
 			},
 			imageInput(image) {
 				let index = this.currentSpecsIndex
-				if(index < 0) {
-					this.item.image = image
-				} else {
-					this.item.specs[index].image = image
-				}
+				this.item.specs[index].image = image
 			},
 			specsTap(index) {
 				setTimeout(() => {
-					if(this.currentSpecsIndex == index) {
-						this.currentSpecsIndex = -1
-					} else {
-						this.currentSpecsIndex = index
-					}
+					this.currentSpecsIndex = index
 				}, 20)
 			},
 			specsAdd() {
 				let specs = this.item.specs
 				/* 当前还有一个空字段时，不允许再新增字段 */
-				if(specs.length && specs[specs.length-1].title=='') return
+				if(specs[specs.length-1].title=='') return
 				specs.push({
 					id: '' + Date.now(),
 					image: '',
@@ -167,8 +138,10 @@
 				this.currentSpecsIndex = specs.length - 1
 			},
 			specsLongTap(index) {
+				/* 主商品不可以被编辑 */
+				if (index == 0) return
+
 				let specs = this.item.specs
-				let title = specs[index].title || '未命名'
 				Bus.$emit('actionsheet', {
 					data: specs,
 					dataIndex: index,
@@ -186,7 +159,7 @@
 						title: '删除',
 						action: () => {
 							if(this.currentSpecsIndex == index) {
-								this.currentSpecsIndex = -1
+								this.currentSpecsIndex = 0
 							}
 						}
 					}]
@@ -306,6 +279,8 @@
 				border-radius: 8px
 				border: 1px solid #ddd
 				cursor: pointer
+				&:first-child
+					background: #eee
 				&.active
 					color: #f63
 					border: 1px solid #f63

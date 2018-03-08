@@ -1,9 +1,9 @@
 <template>
-	<div class="items" ref="items">
+	<div class="items">
 		<div class="items-wrapper">
-			<div class="item" :class="{'offshelf': item.onShelf=='0'}" v-for="item in categoryItems" v-if="item.title" @tap="itemTap(item)" @longtap="itemLongTap(item)">
-				<div class="item-image"><img :src="item.image"/></div>
-				<div class="item-title">{{item.title}}</div>
+			<div class="item" :class="{'offshelf': item.onShelf=='0'}" v-for="item in categoryItems" @tap="itemTap(item)" @longtap="itemLongTap(item)">
+				<div class="item-image"><img :src="item.specs[0].image"/></div>
+				<div class="item-title">{{item.specs[0].title}}</div>
 			</div>
 			<div class="item item-new" @tap="itemTap({id:''})" v-show="cid">
 				<div class="item-image"><img src="@/common/image/plus.png"/></div>
@@ -28,19 +28,21 @@
 		created() {
 			getItems().then((items) => {
 				this.items = items
-				this._initScroll()
 			})
 			Bus.$on('activeCateId', (cid) => {
 				this.cid = cid
 			})
+		},
+		activated() {
+			this._initScroll()
 		},
 		watch: {
 			'$route'(to, from) {
 				if (to.name == 'goods' && from.name == 'item') {
 					let item = from.params.item
 					if (!item) return
-					/* 新建商品时，如果商品标题为空，则舍弃该商品，当成未建新商品 */
-					if (item.title == '') {
+					/* 新建商品时，如果商品标题为空，舍弃该空商品 */
+					if (item.specs[0].title == '') {
 						this.items.pop()
 					} else {
 						/* 有空的商品规格时，舍弃该空商品规格 */
@@ -58,10 +60,9 @@
 			_initScroll() {
 				setTimeout(()=>{
 					if(!this.scroll) {
-						this.scroll = new BScroll(this.$refs.items, {
+						this.scroll = new BScroll('.items', {
 							tap: true,
-							longtap: true,
-							click: true
+							longtap: true
 						})
 					} else {
 						this.scroll.refresh()
@@ -73,11 +74,14 @@
 					item = {
 						id: '' + Date.now(),
 						cid: this.cid,
-						title: '',
-						image: '',
-						descs: '',
-						price: '',
-						specs: []
+						specs: [{
+							id: '' + Date.now(),
+							title: '',
+							image: '',
+							descs: '',
+							price: '',
+							onShelf: '1'
+						}]
 					}
 					this.items.push(item)
 				}
@@ -128,8 +132,8 @@
 		computed: {
 			categoryItems() {
 				let _items = []
-				for(let i in this.items) {
-					if(this.items[i].cid == this.cid){
+				for (let i in this.items) {
+					if (this.items[i].cid == this.cid) {
 						_items.push(this.items[i])
 					}
 				}
