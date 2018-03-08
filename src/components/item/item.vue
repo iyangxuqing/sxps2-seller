@@ -9,13 +9,13 @@
 			<div class="item" v-if="item">
 				<div class="item-edit">
 					<div class="item-edit-image">
-						<imageUploader v-model="editImage" @change="imageInput"></imageUploader>
+						<imageUploader v-model="editor.image" @change="imageInput"></imageUploader>
 					</div>
 					<div class="item-edit-text">
-						<input class="title" :value="editTitle" placeholder="输入名称" @blur="titleInput" @keyup.enter="inputEnter">
-						<input class="descs" :value="editDescs" placeholder="输入附注说明" @blur="descsInput" @keyup.enter="inputEnter">
+						<input class="title" :value="editor.title" placeholder="输入名称" @blur="titleInput" @keyup.enter="inputEnter">
+						<input class="descs" :value="editor.descs" placeholder="输入附注说明" @blur="descsInput" @keyup.enter="inputEnter">
 						<div class="price">
-							<input :value="editPrice" placeHolder="0.00" @blur="priceInput" @keyup.enter="inputEnter">	
+							<input :value="editor.price" placeHolder="0.00" @blur="priceInput" @keyup.enter="inputEnter">	
 							<div class="yuan">元</div>
 						</div>
 					</div>
@@ -32,7 +32,6 @@
 
 <script type="text/ecmascript-6">
 	import Vue from 'vue'
-	import axios from 'axios'
 	import Bus from '@/common/js/bus'
 	import BScroll from '@/base/better-scroll/src/index'
 	import imageUploader from '@/base/imageUploader/imageUploader'
@@ -46,53 +45,54 @@
 			},
 			item: {
 				type: Object,
-				default: null
+				default: () => {}
 			}
 		},
 		data() {
 			return {
-				editTitle: '',
-				editDescs: '',
-				editPrice: '',
-				editImage: '',
-				currentSpecsIndex: 0,
-				actionsheetShow: false,
-				specsEditorShow: false
+				currentSpecsIndex: -1,
+				editor: {}
 			}
 		},
 		created() {
+		},
+		activated() {
 			if (!this.item) {
 				this.$router.push('/goods')
 				return
 			}
-			this.currentSpecsIndex = -1
-			this.editTitle = this.item.title
-			this.editDescs = this.item.descs
-			this.editPrice = this.item.price
-			this.editImage = this.item.image
-		},
-		mounted() {
 			setTimeout(() => {
 				this.scroll = new BScroll(this.$refs.page, {
 					tap: true,
-					longtap: true,
-					click: true
+					click: true,
+					longtap: true
 				})
 			}, 20)
+			this.currentSpecsIndex = -1
+			this.editor = {
+				title: this.item.title,
+				descs: this.item.descs,
+				price: this.item.price,
+				image: this.item.image
+			}			
 		},
 		watch: {
 			currentSpecsIndex() {
 				let i = this.currentSpecsIndex
 				if(i < 0) {
-					this.editTitle = this.item.title
-					this.editDescs = this.item.descs
-					this.editPrice = this.item.price
-					this.editImage = this.item.image
+					this.editor = {
+						title: this.item.title,
+						descs: this.item.descs,
+						price: this.item.price,
+						image: this.item.image
+					}
 				} else {
-					this.editTitle = this.item.specs[i].title
-					this.editDescs = this.item.specs[i].descs
-					this.editPrice = this.item.specs[i].price
-					this.editImage = this.item.specs[i].image
+					this.editor = {
+						title: this.item.specs[i].title,
+						descs: this.item.specs[i].descs,
+						price: this.item.specs[i].price,
+						image: this.item.specs[i].image
+					}
 				}
 			}
 		},

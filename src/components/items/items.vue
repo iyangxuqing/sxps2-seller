@@ -9,7 +9,6 @@
 				<div class="item-image"><img src="@/common/image/plus.png"/></div>
 			</div>
 		</div>
-		<router-view></router-view>
 	</div>
  </template>
 
@@ -102,16 +101,26 @@
 					data: this.items,
 					dataIndex: index,
 					items: [{
-						title: '往前移'
+						title: '往前移',
+						action: () => {
+							setItem(item, 'sortUp')
+						}
 					},{
-						title: '往后移'
+						title: '往后移',
+						action: () => {
+							setItem(item, 'sortDown')
+						}
 					},{
 						title: '上下架',
 						action: () => {
 							item.onShelf = item.onShelf == '1' ? '0' : '1'
+							setItem(item, 'set')
 						}
 					},{
-						title: '删除'
+						title: '删除',
+						action: () => {
+							setItem(item, 'delete')
+						}
 					}]
 				})
 			}
@@ -139,16 +148,16 @@
 		.items-wrapper
 			display: flex
 			flex-wrap: wrap
-			padding: 20px
+			padding: 15px
 			.item
-				$width = calc((100vw - 80px)/3)
+				$width = calc((100vw - 60px)/3)
 				width: $width
-				margin-bottom: 10px
+				margin-bottom: 5px
 				cursor: pointer
 				position: relative
 				&:nth-of-type(3n+2)
-					margin-left: 20px
-					margin-right: 20px
+					margin-left: 15px
+					margin-right: 15px
 				.item-image
 					width: 100%
 					height: $width
@@ -177,7 +186,7 @@
 	.pc 
 		.items
 			.item
-				width: calc((100% - 40px)/3)
+				width: calc((100% - 30px)/3)
 				.item-image
-					height: 90px					
+					height: 104px					
 </style>
