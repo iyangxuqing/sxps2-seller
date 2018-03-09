@@ -38,15 +38,17 @@ export default {
 
 <style lang="stylus" rel="stylesheet/stylus">
 	#app
-		position: relative
+		position: absolute
 		width: 100%
 		height: 100%
 		overflow: hidden
 		&.pc
-			top: 40px
+			top: 50%
+			left: 50%
 			width: 375px
 			height: 667px
-			margin: 0 auto
+			margin-top: -333px
+			margin-left: -187px
 			font-size: 14px
 			border: 1px solid #ccc
 			box-shadow: 0px 0px 10px 2px #ccc
