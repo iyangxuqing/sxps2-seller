@@ -2,7 +2,7 @@ import 'babel-polyfill'
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import '@/base/directive/v-number'
+import '@/base/directive/v-money'
 import '@/common/stylus/index.styl'
 
 Vue.config.productionTip = false

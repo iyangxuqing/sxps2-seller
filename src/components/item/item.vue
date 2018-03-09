@@ -15,7 +15,7 @@
 						<input class="title" :value="editor.title" placeholder="输入名称" maxlength="8" @blur="titleInput" @keyup.enter="inputEnter">
 						<input class="descs" :value="editor.descs" placeholder="输入附注说明" maxlength="26" @blur="descsInput" @keyup.enter="inputEnter">
 						<div class="price">
-							<input :value="editor.price" placeHolder="0.00" maxlength="7" v-number @blur="priceInput" @keyup.enter="inputEnter"><div class="yuan">元</div>
+							<input :value="editor.price" placeHolder="0.00" maxlength="7" v-money @blur="priceInput" @keyup.enter="inputEnter"><div class="yuan">元</div>
 						</div>
 					</div>
 				</div>
@@ -114,6 +114,7 @@
 			},
 			priceInput(e) {
 				let value = e.target.value
+				value = Number(value).toFixed(2)
 				let index = this.currentSpecsIndex
 				this.editor.price = value
 				this.item.specs[index].price = value
