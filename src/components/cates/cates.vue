@@ -109,6 +109,7 @@
 					},{
 						title: '往前移',
 						action: () => {
+							console.log('11')
 							let cates = this.cates
 							let {i, j} = this._getCateIndex(cate)
 							if (typeof j == 'undefined') {
@@ -124,11 +125,7 @@
 									Vue.set(cates[i].children, j - 1, temp)
 								}
 							}
-							setCate({
-								id: cate.id,
-								pid: cate.pid,
-								sort: cate.sort
-							}, 'sortUp')
+							setCate(cates, 'sort')
 						}
 					},{
 						title: '往后移',
@@ -148,11 +145,7 @@
 									Vue.set(cates[i].children, Number(j) + 1, temp)
 								}
 							}
-							setCate({
-								id: cate.id,
-								pid: cate.pid,
-								sort: cate.sort
-							}, 'sortDown')
+							setCate(cates, 'sort')
 						}
 					},{
 						title: '删除',

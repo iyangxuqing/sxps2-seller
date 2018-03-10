@@ -32,7 +32,6 @@
 				/* 当options中带有data字段和dataIndex字段时，执行内部'往前移'、'往后移'、'删除'操作 */
 				this.data = options.data
 				this.dataIndex = options.dataIndex
-				this.baseAction = 'data' in options && 'dataIndex' in options
 			})
 		},
 		watch: {
@@ -60,19 +59,21 @@
 				if (item.disable) return
 				let data = this.data
 				let dataIndex = this.dataIndex
-				if (this.baseAction && item.title == '往前移') {
-					if (dataIndex > 0) {
+				if (item.title == '往前移') {
+					if (data && dataIndex > 0) {
 						let temp = data[dataIndex]
 						Vue.set(data, dataIndex, data[dataIndex - 1])
 						Vue.set(data, dataIndex - 1, temp)
 					}
+					item.action && item.action(data)
 				}
-				else if (this.baseAction && item.title == '往后移') {
-					if (dataIndex < data.length - 1) {
+				else if (item.title == '往后移') {
+					if (data && dataIndex < data.length - 1) {
 						let temp = data[dataIndex]
 						Vue.set(data, dataIndex, data[Number(dataIndex) + 1])
 						Vue.set(data, Number(dataIndex) + 1, temp)
 					}
+					item.action && item.action(data)
 				}
 				else if (item.title == '删除') {
 					Bus.$emit('alert', {
@@ -80,13 +81,10 @@
 						content: '确定要删除该项吗？删除后无法恢复。',
 						showCancel: true,
 						confirm: () => {
-							this.baseAction && data.splice(dataIndex, 1)
-							item.action && item.action()
+							this.data && data.splice(dataIndex, 1)
+							item.action && item.action(item)
 						}
 					})
-				}
-				if (item.title != '删除') {
-					item.action && item.action(value)
 				}
 				this.show = false
 			},

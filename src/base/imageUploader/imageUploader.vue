@@ -1,6 +1,6 @@
 <template>  
   <div class="image-uploader">
-  	<div class="preview" :style="'backgroundImage:url('+image+')'"></div>
+  	<div class="preview" :style="'backgroundImage:url(' + image + ')'"></div>
  		<input type="file" id="upload" accept="image/png,image/jpeg,image/jpg,image/gif" @change="change">
  		<label for="upload"></label>
  		<div class="placeholder" v-if="!image">{{placeholder}}</div>
@@ -29,9 +29,12 @@
 	  },
 	  methods: {
 	  	change(e) {
+	  		console.log(e)
 	      let files = e.target.files
 	      if (!files.length) return
 	      this._imgPreview(files[0])
+	    	/* 重置input[type='file']，以便后面选择相同文件时可以继续触发change事件 */
+	      e.target.value = ''
 	    }, 
 	    _imgPreview(file) {
 	      let self = this

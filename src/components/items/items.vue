@@ -107,12 +107,12 @@
 					items: [{
 						title: '往前移',
 						action: () => {
-							setItem(item, 'sortUp')
+							setItem(this.items, 'sort')
 						}
 					},{
 						title: '往后移',
 						action: () => {
-							setItem(item, 'sortDown')
+							setItem(this.items, 'sort')
 						}
 					},{
 						title: '上下架',
