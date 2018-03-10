@@ -109,7 +109,6 @@
 					},{
 						title: '往前移',
 						action: () => {
-							console.log('11')
 							let cates = this.cates
 							let {i, j} = this._getCateIndex(cate)
 							if (typeof j == 'undefined') {

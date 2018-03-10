@@ -2,7 +2,7 @@
 	<div class="actionsheet" :class="{'show': show}">
 		<div class="actionsheet-list" :style="'height:'+height+'px'">
 			<div class="actionsheet-item" :class="{'disable': item.disable}" v-for="(item, index) in items">
-				<div class="actionsheet-item-title" v-if="item.title" @touchstart="touchstart(index)" @mousedown="mousedown(index)">{{item.title}}</div>
+				<div class="actionsheet-item-title" v-if="item.title" @touchstart="touchstart(index, $event)" @mousedown="mousedown(index, $event)">{{item.title}}</div>
 				<div class="actionsheet-item-input" v-if="item.value"><input :value="item.value" :placeholder="item.placeholder" @keyup.enter="inputEnter(index, $event)"/></div>
 			</div>
 			<div class="actionsheet-item actionsheet-item-separator"></div>
@@ -40,40 +40,44 @@
 			}
 		},
 		methods: {
-			touchstart(index) {
+			touchstart(index, e) {
 				if (this.isPc) return
 				this.action(index)
 			},
-			mousedown(index) {
+			mousedown(index, e) {
 				if (!this.isPc) return
-				this.action(index)
+				this.action(index, {ctrlKey: e.ctrlKey, shiftKey: e.shiftKey})
 			},
 			inputEnter(index, e) {
 				if (e.target.value) {
 					e.target.blur()
-					this.action(index, e.target.value)
+					this.action(index, {value: e.target.value})
 				}
 			},
-			action(index, value) {
+			action(index, options) {
 				let item = this.items[index]
 				if (item.disable) return
+
 				let data = this.data
 				let dataIndex = this.dataIndex
-				if (item.title == '往前移') {
-					if (data && dataIndex > 0) {
-						let temp = data[dataIndex]
-						Vue.set(data, dataIndex, data[dataIndex - 1])
-						Vue.set(data, dataIndex - 1, temp)
-					}
-					item.action && item.action(data)
+
+				if (data && item.title == '往前移') {
+					let step = options.ctrlKey ? 6 : 1
+					let i1 = dataIndex
+					let i2 = i1 - step
+					if (i2 < 0) i2 = 0
+					let temp = data[i1]
+					Vue.set(data, i1, data[i2])
+					Vue.set(data, i2, temp)
 				}
-				else if (item.title == '往后移') {
-					if (data && dataIndex < data.length - 1) {
-						let temp = data[dataIndex]
-						Vue.set(data, dataIndex, data[Number(dataIndex) + 1])
-						Vue.set(data, Number(dataIndex) + 1, temp)
-					}
-					item.action && item.action(data)
+				else if ( data && item.title == '往后移') {
+					let step = options.ctrlKey ? 6 : 1
+					let i1 = dataIndex
+					let i2 = Number(i1) + step
+					if (i2 > data.length - 1) i2 = data.length - 1
+					let temp = data[i1]
+					Vue.set(data, i1, data[i2])
+					Vue.set(data, i2, temp)
 				}
 				else if (item.title == '删除') {
 					Bus.$emit('alert', {
@@ -85,6 +89,9 @@
 							item.action && item.action(item)
 						}
 					})
+				}
+				if (item.title != '删除') {
+					item.action && item.action(options.value)
 				}
 				this.show = false
 			},

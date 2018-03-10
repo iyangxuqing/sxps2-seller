@@ -22,7 +22,8 @@
 	 	data() {
 	 		return {
 	 			cid: '',
-	 			items: []
+	 			items: [],
+	 			categoryItems: []
 	 		}
  		},
 		created() {
@@ -37,7 +38,7 @@
 			this._initScroll()
 		},
 		watch: {
-			'$route'(to, from) {
+			'$route': function(to, from) {
 				if (to.name == 'goods' && from.name == 'item') {
 					let item = from.params.item
 					if (!item) return
@@ -54,6 +55,25 @@
 						setItem(item, 'set')
 					}
 				}
+			},
+			'cid': function() {
+				let _items = []
+				for (let i in this.items) {
+					if (this.items[i].cid == this.cid) {
+						_items.push(this.items[i])
+					}
+				}
+				this.categoryItems = _items
+				this.scroll && this.scroll.scrollTo(0, 0)
+			},
+			'items': function() {
+				let _items = []
+				for (let i in this.items) {
+					if (this.items[i].cid == this.cid) {
+						_items.push(this.items[i])
+					}
+				}
+				this.categoryItems = _items
 			}
 		},
 		methods: {
@@ -128,18 +148,18 @@
 					}]
 				})
 			}
-		},
-		computed: {
-			categoryItems() {
-				let _items = []
-				for (let i in this.items) {
-					if (this.items[i].cid == this.cid) {
-						_items.push(this.items[i])
-					}
-				}
-				this.scroll && this.scroll.scrollTo(0, 0)
-				return _items
-			}
+		// },
+		// computed: {
+		// 	categoryItems() {
+		// 		let _items = []
+		// 		for (let i in this.items) {
+		// 			if (this.items[i].cid == this.cid) {
+		// 				_items.push(this.items[i])
+		// 			}
+		// 		}
+		// 		this.scroll && this.scroll.scrollTo(0, 0)
+		// 		return _items
+		// 	}
 		}
 	}
 </script>
