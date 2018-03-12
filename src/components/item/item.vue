@@ -12,10 +12,10 @@
 						<imageUploader v-model="editor.image" @change="imageInput"></imageUploader>
 					</div>
 					<div class="item-edit-text">
-						<input class="title" :value="editor.title" placeholder="输入名称" maxlength="8" @blur="titleInput" @keyup.enter="inputEnter">
-						<input class="descs" :value="editor.descs" placeholder="输入附注说明" maxlength="26" @blur="descsInput" @keyup.enter="inputEnter">
+						<input class="title" :value="editor.title" placeholder="输入名称" maxlength="6" @blur="titleInput" @keyup.enter="inputEnter">
+						<input class="descs" :value="editor.descs" placeholder="输入附注说明" maxlength="14" @blur="descsInput" @keyup.enter="inputEnter">
 						<div class="price">
-							<input :value="editor.price" placeHolder="0.00" maxlength="7" v-money @blur="priceInput" @keyup.enter="inputEnter"><div class="yuan">元</div>
+							<input :value="editor.price" placeHolder="0.00" maxlength="6" v-money @blur="priceInput" @keyup.enter="inputEnter"><div class="yuan">元</div>
 						</div>
 					</div>
 				</div>
